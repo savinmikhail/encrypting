@@ -1,66 +1,77 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Crypt
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+See the task below
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# Тестовое задание для PHP-разработчика
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Требуется реализовать декораторы для [PSR-7 потоков](https://github.com/php-fig/http-message/blob/14b9b813c5e36af4498ef38ef97938bf7090fd52/src/StreamInterface.php), которые будут зашифровывать и расшифровывать их по алгоритмам, используемым WhatsApp.
+Текстовые описания алгоритмов можно будет найти ниже.
 
-## Learning Laravel
+Код необходимо оформить в виде пакета для composer. От реализации ожидается промышленное качество кода.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Тестовые файлы можно найти в папке `samples`:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+* `*.original` - оригинальный файл;
+* `*.key` - ключ для шифрования (дешифрования) - `mediaKey`;
+* `*.encrypted` - зашифрованный файл;
+* `*.sidecar` - информация для стриминга.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+В качестве задания со звёздочкой можно реализовать генерацию информации для стриминга.
+Эта генерация не должна делать дополнительных чтений из потока-исходника.
 
-## Laravel Sponsors
+## Шифрование
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Generate your own `mediaKey`, which needs to be 32 bytes, or use an existing one when available.
+2. Expand it to 112 bytes using HKDF with SHA-256 and type-specific application info (see below). Call this value `mediaKeyExpanded`.
+3. Split `mediaKeyExpanded` into:
+    - `iv`: `mediaKeyExpanded[:16]`
+    - `cipherKey`: `mediaKeyExpanded[16:48]`
+    - `macKey`: `mediaKeyExpanded[48:80]`
+    - `refKey`: `mediaKeyExpanded[80:]` (not used)
+4. Encrypt the file with AES-CBC using `cipherKey` and `iv`, pad it and call it `enc`.
+5. Sign `iv + enc` with `macKey` using HMAC SHA-256 and store the first 10 bytes of the hash as `mac`.
+   to obtain the result.
 
-### Premium Partners
+## Дешифрование
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+1. Obtain `mediaKey`.
+2. Expand it to 112 bytes using HKDF with SHA-256 and type-specific application info (see below). Call this value `mediaKeyExpanded`.
+3. Split `mediaKeyExpanded` into:
+    - `iv`: `mediaKeyExpanded[:16]`
+    - `cipherKey`: `mediaKeyExpanded[16:48]`
+    - `macKey`: `mediaKeyExpanded[48:80]`
+    - `refKey`: `mediaKeyExpanded[80:]` (not used)
+4. Obtain encrypted media data and split it into:
+    - `file`: `mediaData[:-10]`
+    - `mac`: `mediaData[-10:]`
+5. Validate media data with HMAC by signing `iv + file` with `macKey` using SHA-256. Take in mind that `mac` is truncated to 10 bytes, so you should compare only the first 10 bytes.
+6. Decrypt `file` with AES-CBC using `cipherKey` and `iv`, and unpad it to obtain the result.
 
-## Contributing
+## Информационные строки для HKDF
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+HKDF позволяет указывать информационные строки, специфичные для контекста/приложения.
+В данном случае контекстом является тип файла, для каждого из которых своя информационная строка:
 
-## Code of Conduct
+| Media Type | Application Info         |
+| ---------- | ------------------------ |
+| IMAGE      | `WhatsApp Image Keys`    |
+| VIDEO      | `WhatsApp Video Keys`    |
+| AUDIO      | `WhatsApp Audio Keys`    |
+| DOCUMENT   | `WhatsApp Document Keys` |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Информация для стриминга
 
-## Security Vulnerabilities
+This step is required only for streamable media, e.g. video and audio.
+As CBC mode allows to decrypt a data from random offset (block-size aligned), it is possible to play and seek the media without the need to fully download it.
+That said, we have to generate a `sidecar`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Do it by signing every `[n*64K, (n+1)*64K+16]` chunk with `macKey`, truncating the result to the first 10 bytes.
+Then combine everything in one piece.
 
-## License
+## Полезные пакеты
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* [jsq/psr7-stream-encryption](https://github.com/jeskew/php-encrypted-streams) - декораторы для шифрования, дешифрования и хеширования;
+* [guzzlehttp/psr7](https://github.com/guzzle/psr7) - одна из реализаций PSR-7.
+
