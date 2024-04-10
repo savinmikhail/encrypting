@@ -3,11 +3,11 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use src\CorruptedMediaKeyException;
-use src\CryptException;
-use src\EmptyFileException;
 use src\Encryption;
-use src\FileNotFoundException;
+use src\Exceptions\CorruptedMediaKeyException;
+use src\Exceptions\CryptException;
+use src\Exceptions\EmptyFileException;
+use src\Exceptions\FileNotFoundException;
 
 class EncryptionTest extends TestCase
 {

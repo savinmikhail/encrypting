@@ -6,6 +6,11 @@ namespace src;
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
+use src\Enums\MediaTypeEnum;
+use src\Exceptions\CorruptedMediaKeyException;
+use src\Exceptions\CryptException;
+use src\Exceptions\EmptyFileException;
+use src\Exceptions\FileNotFoundException;
 
 readonly class Encryption
 {
