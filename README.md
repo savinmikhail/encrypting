@@ -69,9 +69,3 @@ That said, we have to generate a `sidecar`.
 
 Do it by signing every `[n*64K, (n+1)*64K+16]` chunk with `macKey`, truncating the result to the first 10 bytes.
 Then combine everything in one piece.
-
-## Полезные пакеты
-
-* [jsq/psr7-stream-encryption](https://github.com/jeskew/php-encrypted-streams) - декораторы для шифрования, дешифрования и хеширования;
-* [guzzlehttp/psr7](https://github.com/guzzle/psr7) - одна из реализаций PSR-7.
-
