@@ -102,14 +102,14 @@ abstract class Crypt
         return [$iv, $cipherKey, $macKey];
     }
 
-    protected function getExpandedMediaKey(string $mediaKey, MediaTypeEnum $mediaType): string
+    protected function getExpandedMediaKey(string $mediaKey): string
     {
         // Expand mediaKey to 112 bytes using HKDF with SHA-256 and type-specific application info
         return hash_hkdf(
             self::HASH_ALGORITHM,
             $mediaKey,
             self::MEDIA_KEY_EXPANDED_LENGTH,
-            $mediaType->value,
+            $this->mediaType->value,
         );
     }
 
