@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use src\Decryption;
 use src\Encryption;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
@@ -15,20 +16,25 @@ class EncryptionTest extends TestCase
 
     private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
 
+    private Encryption $encryption;
+    private Decryption $decryption;
+
+    public function setUp(): void
+    {
+        $this->encryption = new Encryption();
+        $this->decryption = new Decryption();
+    }
+
     public function testEncryptionDecryptionWithStringData()
     {
-        $encryptor = new Encryption();
-
-        // Encrypt the stream data
-        $encryptedString = $encryptor->encryptFile(self::TEST_FILES_FOLDER.'orig.txt');
+        //act
+        $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'orig.txt');
+        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'enc.txt');
 
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
-
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->decryptFile(self::TEST_FILES_FOLDER.'enc.txt');
-
         file_put_contents(self::TEST_FILES_FOLDER.'dec.txt', $decryptedString);
-        // Assert that the decrypted string matches the original input string
+
+        //assert
         $this->assertEquals(
             file_get_contents(self::TEST_FILES_FOLDER.'orig.txt'),
             file_get_contents(self::TEST_FILES_FOLDER.'dec.txt')
@@ -37,26 +43,26 @@ class EncryptionTest extends TestCase
 
     public function testEncryptionDecryptionWithInvalidFilePath()
     {
-        // Test encryption and decryption with invalid file paths
-        $encryptor = new Encryption();
+        //assert
         $this->expectException(FileNotFoundException::class);
-        $encryptor->encryptFile('path/to/invalid_file.txt');
+        //act
+        $this->encryption->encryptFile('path/to/invalid_file.txt');
     }
 
     public function testEncryptionDecryptionWithEmptyFile()
     {
-        // Test encryption and decryption with an empty file
-        $encryptor = new Encryption();
+        //assert
         $this->expectException(EmptyFileException::class);
-        $encryptor->encryptFile(self::TEST_FILES_FOLDER.'empty_file.txt');
+        //act
+        $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'empty_file.txt');
     }
 
     public function testEncryptionDecryptionWithInvalidKeyFile()
     {
-        // Test encryption and decryption with an invalid key file
-        $encryptor = new Encryption();
+        //assert
         $this->expectException(FileNotFoundException::class);
-        $encryptor->encryptFile(
+        //act
+        $this->encryption->encryptFile(
             self::TEST_FILES_FOLDER.'orig.txt',
             'path/to/invalid_key.txt'
         );
@@ -64,18 +70,18 @@ class EncryptionTest extends TestCase
 
     public function testEncryptionDecryptionWithCorruptedEncryptedFile()
     {
-        // Test decryption with a corrupted encrypted file
-        $encryptor = new Encryption();
+        //assert
         $this->expectException(CryptException::class);
-        $encryptor->decryptFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt');
+        //act
+        $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt');
     }
 
     public function testEncryptionDecryptionWithIncorrectMediaKey()
     {
-        // Test decryption with an incorrect media key
-        $encryptor = new Encryption();
+        //assert
         $this->expectException(CorruptedMediaKeyException::class);
-        $encryptor->decryptFile(
+        //act
+        $this->decryption->decryptFile(
             self::TEST_FILES_FOLDER.'enc.txt',
             self::TEST_FILES_FOLDER.'incorrect_media_key.txt'
         );
@@ -83,129 +89,158 @@ class EncryptionTest extends TestCase
 
     public function testEncryptionDecryptionWithCustomImage()
     {
-        $encryptor = new Encryption();
-        $encryptedString = $encryptor->encryptFile(self::TEST_FILES_FOLDER.'myImage.png');
+        //act
+        $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'myImage.png');
+        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png');
+
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);
-        $decryptedString = $encryptor->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png');
         file_put_contents(self::TEST_FILES_FOLDER.'myImageDec.png', $decryptedString);
 
-        // Calculate hashes of the original and decrypted files
         $originalHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImage.png');
         $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImageDec.png');
+
+        //assert
         $this->assertEquals($originalHash, $decryptedHash);
-        //        $this->assertEquals(file_get_contents('myImage.png'), file_get_contents('decMyImage.png'));
     }
 
     public function testDecryptionWithImageFromSamples()
     {
-        $encryptor = new Encryption();
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->decryptFile(
+        //act
+        $decryptedString = $this->decryption->decryptFile(
             self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg',
             self::SAMPLES_FILES_FOLDER.'IMAGE.key'
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg', $decryptedString);
-        // Assert that the decrypted string matches the original input string
+
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg');
+        $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'IMAGE.jpeg');
+
+        //assert
         $this->assertEquals(
-            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
-            file_get_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg')
+            $originalHash,
+            $decryptedHash,
         );
     }
 
     public function testEncryptionWithImage()
     {
-        $encryptor = new Encryption();
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->encryptFile(
+        //act
+        $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
             self::SAMPLES_FILES_FOLDER.'IMAGE.key'
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'imageEnc.jpeg', $decryptedString);
 
-        // Calculate hashes of the original and decrypted files
         $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg');
         $encryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'imageEnc.jpeg');
 
+        //assert
         $this->assertEquals($originalHash, $encryptedHash);
-        // Assert that the decrypted string matches the original input string
-        //        $this->assertEquals(file_get_contents('samples/imageEnc.jpeg'), file_get_contents('imageEnc.jpeg'));
     }
 
     public function testDecryptionWithAudio()
     {
-        $encryptor = new Encryption();
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->decryptFile(
+        //act
+        $decryptedString = $this->decryption->decryptFile(
             self::SAMPLES_FILES_FOLDER.'audioEnc.mp3',
             self::SAMPLES_FILES_FOLDER.'AUDIO.key'
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'AUDIO.mp3', $decryptedString);
 
-        // Calculate hashes of the original and decrypted files
         $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'AUDIO.mp3');
         $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'AUDIO.mp3');
+
+        //assert
         $this->assertEquals($originalHash, $decryptedHash);
-        // Assert that the decrypted string matches the original input string
-        //        $this->assertEquals(file_get_contents('samples/AUDIO.mp3'), file_get_contents('AUDIO.mp3'));
     }
 
     public function testEncryptionWithAudio()
     {
-        $encryptor = new Encryption();
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->encryptFile(
+        //act
+        $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'AUDIO.mp3',
             self::SAMPLES_FILES_FOLDER.'AUDIO.key'
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'audioEnc.mp3', $decryptedString);
 
-        // Calculate hashes of the original and decrypted files
         $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'audioEnc.mp3');
         $encryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'audioEnc.mp3');
+
+        //assert
         $this->assertEquals($originalHash, $encryptedHash);
-        // Assert that the decrypted string matches the original input string
-        //        $this->assertEquals(file_get_contents('samples/AUDIO.mp3'), file_get_contents('AUDIO.mp3'));
     }
 
     public function testDecryptionWithVideo()
     {
-        $encryptor = new Encryption();
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->decryptFile(
+        //act
+        $decryptedString = $this->decryption->decryptFile(
             self::SAMPLES_FILES_FOLDER.'videoEnc.mp4',
             self::SAMPLES_FILES_FOLDER.'VIDEO.key'
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'VIDEO.mp4', $decryptedString);
 
-        // Calculate hashes of the original and decrypted files
         $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'VIDEO.mp4');
         $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'VIDEO.mp4');
+
+        //assert
         $this->assertEquals($originalHash, $decryptedHash);
-        // Assert that the decrypted string matches the original input string
-        //        $this->assertEquals(file_get_contents('samples/AUDIO.mp3'), file_get_contents('AUDIO.mp3'));
     }
 
     public function testEncryptionWithVideo()
     {
-        $encryptor = new Encryption();
-        // Decrypt the encrypted stream data
-        $decryptedString = $encryptor->encryptFile(
+       //act
+        $encryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
             self::SAMPLES_FILES_FOLDER.'VIDEO.key'
         );
 
-        file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $decryptedString);
+        file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $encryptedString);
 
-        // Calculate hashes of the original and decrypted files
         $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'videoEnc.mp4');
         $encryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'videoEnc.mp4');
+
+       //assert
         $this->assertEquals($originalHash, $encryptedHash);
-        // Assert that the decrypted string matches the original input string
-        //        $this->assertEquals(file_get_contents('samples/AUDIO.mp3'), file_get_contents('AUDIO.mp3'));
+    }
+
+    public function testSideCarWithVideo()
+    {
+        //act
+        $this->encryption->encryptFile(
+            self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
+            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+        );
+
+        $sideCar = $this->encryption->getSideCar();
+
+//        dd($sideCar, file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.sidecar'));
+        file_put_contents(self::TEST_FILES_FOLDER.'video.sidecar', $sideCar);
+
+        //assert
+        $this->assertEquals(
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.sidecar'),
+            file_get_contents(self::TEST_FILES_FOLDER.'video.sidecar')
+        );
+    }
+
+    public function testSideCarWithDocument()
+    {
+        //act
+        $this->encryption->encryptFile(
+            self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
+            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+        );
+
+        $sideCar = $this->encryption->getSideCar();
+
+        file_put_contents(self::TEST_FILES_FOLDER.'video.sidecar', $sideCar);
+
+        //assert
+        $this->assertEquals(null, $sideCar);
     }
 }
