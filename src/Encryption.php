@@ -13,6 +13,10 @@ use src\Exceptions\FileNotFoundException;
 
 class Encryption extends Crypt
 {
+    private string $macKey;
+    private MediaTypeEnum $mediaType;
+    private StreamInterface $stream;
+
     /**
      * принимает файл, возвращает строоку зашифрованных байтов
      */
@@ -63,6 +67,9 @@ class Encryption extends Crypt
 
         //3. Split `mediaKeyExpanded`
         [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        $this->macKey = $macKey;
+        $this->mediaType = $mediaType;
+        $this->stream = $stream;
 
         //4. Encrypt the file
         $enc = $this->encrypt($stream, $cipherKey, $iv);
@@ -72,6 +79,15 @@ class Encryption extends Crypt
 
         //6. Append `mac` to the `enc`
         return $enc.$mac;
+    }
+
+    public function getSideCar(): ?string
+    {
+        $sidecar = null;
+        if (in_array($this->mediaType->name, ['AUDIO', 'VIDEO'])) {
+            $sidecar = $this->generateSidecar();
+        }
+        return $sidecar;
     }
 
     /**
@@ -116,26 +132,27 @@ class Encryption extends Crypt
 
         return $encryptedData;
     }
+
     /**
      * This will generate the sidecar for the streamable media.
      */
-    private function generateSidecar(StreamInterface $stream, string $macKey): string
+    private function generateSidecar(): string
     {
         // Initialize the sidecar buffer
         $sidecar = '';
 
         // Calculate the chunk size
         $chunkSize = 64 * 1024; // 64 KB
-
+        $this->stream->rewind();
         // Read the stream chunk by chunk
-        while (! $stream->eof()) {
+        while (! $this->stream->eof()) {
             // Read a chunk of data from the stream
-            $chunk = $stream->read($chunkSize + 16); // Add 16 bytes to accommodate the offset
+            $chunk = $this->stream->read($chunkSize + 16); // Add 16 bytes to accommodate the offset
 
-            $mac = hash_hmac(self::HASH_ALGORITHM, $chunk, $macKey, true);
+            $hmac = hash_hmac(self::HASH_ALGORITHM, $this->iv.$chunk, $this->macKey, true);
 
             // Truncate the result to the first 10 bytes
-            $mac = substr($mac, 0, 10);
+            $mac = substr($hmac, 0, 10);
 
             // Append the signed chunk to the sidecar
             $sidecar .= $mac;
