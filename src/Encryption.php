@@ -13,25 +13,8 @@ use src\Exceptions\CryptException;
 use src\Exceptions\EmptyFileException;
 use src\Exceptions\FileNotFoundException;
 
-class Encryption
+class Encryption extends Crypt
 {
-    private const /*string*/ HASH_ALGORITHM = 'sha256';
-
-    private const /*string*/ CIPHER_ALGORITHM = 'aes-256-cbc';
-
-    private const /*int*/ MEDIA_KEY_LENGTH = 32;
-
-    private const /*int*/ MEDIA_KEY_EXPANDED_LENGTH = 112;
-
-    private const /*string*/ DEFAULT_MEDIA_KEY_FILE_NAME = 'mediaKey.txt';
-
-    private const /*int*/ MAC_LENGTH = 10;
-
-    private const /*int*/ CHUNK_LENGTH = 10_000_000; //todo: доделать кусочное шифрование дешифрование
-
-    private const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
-
-    private string $iv;
 
     /**
      * принимает файл, возвращает строоку зашифрованных байтов
@@ -63,38 +46,6 @@ class Encryption
     }
 
     /**
-     * @throws EmptyFileException
-     * @throws FileNotFoundException
-     */
-    private function getStreamFromFile(string $filePath): StreamInterface
-    {
-        if (! file_exists($filePath)) {
-            throw new FileNotFoundException("File $filePath does not exist");
-        }
-        // Check if the file is empty
-        if (filesize($filePath) === 0) {
-            throw new EmptyFileException("File $filePath is empty");
-        }
-        $stream = fopen($filePath, 'r');
-        fseek($stream, 0);
-
-        return new Stream($stream);
-    }
-
-    private function getMediaType(string $filePath): MediaTypeEnum
-    {
-        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
-
-        return match ($ext) {
-            'jpg', 'jpeg', 'png', 'gif' => MediaTypeEnum::IMAGE,
-            'txt', 'pdf', 'docx' => MediaTypeEnum::DOCUMENT,
-            'mp4' => MediaTypeEnum::VIDEO,
-            'mp3' => MediaTypeEnum::AUDIO,
-            default => MediaTypeEnum::DOCUMENT,
-        };
-    }
-
-    /**
      * @throws RandomException
      */
     private function generateMediaKey(): string
@@ -106,25 +57,7 @@ class Encryption
         return $mediaKey;
     }
 
-    /**
-     * @throws CorruptedMediaKeyException
-     * @throws FileNotFoundException
-     */
-    private function getMediaKeyFromFile(string $keyFileName): string
-    {
-        if (! file_exists($keyFileName)) {
-            throw new FileNotFoundException('mediaKey not found');
-        }
 
-        // Obtain mediaKey (your implementation to obtain the media key)
-        $mediaKey = file_get_contents($keyFileName);
-
-        if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
-            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
-        }
-
-        return $mediaKey;
-    }
 
     /**
      * @throws CorruptedMediaKeyException
@@ -257,16 +190,6 @@ class Encryption
         return $this->unpad($decryptedData);
     }
 
-    public function getCurrentIv(): string
-    {
-        return $this->iv;
-    }
-
-    public function updateIv(string $cipherTextBlock): void
-    {
-        $this->iv = substr($cipherTextBlock, self::BLOCK_SIZE * -1);
-    }
-
     /**
      * @throws CryptException
      */
@@ -340,53 +263,11 @@ class Encryption
         return new Stream($stream);
     }
 
-    private function splitExpandedKey(string $mediaKeyExpanded): array
-    {
-        // Split the expanded key into iv, cipherKey, macKey, and refKey
-        $iv = substr($mediaKeyExpanded, 0, 16);
-        $cipherKey = substr($mediaKeyExpanded, 16, 32);
-        $macKey = substr($mediaKeyExpanded, 48, 32);
-
-        return [$iv, $cipherKey, $macKey];
-    }
-
     private function unpad($data): string
     {
         $padding = ord($data[strlen($data) - 1]);
 
         return substr($data, 0, -$padding);
-    }
-
-    private function getExpandedMediaKey(string $mediaKey, MediaTypeEnum $mediaType): string
-    {
-        // Expand mediaKey to 112 bytes using HKDF with SHA-256 and type-specific application info
-        return hash_hkdf(
-            self::HASH_ALGORITHM,
-            $mediaKey,
-            self::MEDIA_KEY_EXPANDED_LENGTH,
-            $mediaType->value,
-        );
-    }
-
-    private function getMac(string $iv, string $encryptedData, string $macKey): string
-    {
-        // Take the first 10 bytes of the HMAC as the MAC
-        return substr(
-            $this->calculateHmac($iv, $encryptedData, $macKey),
-            0,
-            self::MAC_LENGTH,
-        );
-    }
-
-    private function calculateHmac(string $iv, string $encryptedData, string $macKey): string
-    {
-        // Calculate HMAC for iv + encrypted data using macKey
-        return hash_hmac(
-            self::HASH_ALGORITHM,
-            $iv.$encryptedData,
-            $macKey,
-            true
-        );
     }
 
     /**
