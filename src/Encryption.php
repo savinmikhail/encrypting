@@ -15,11 +15,7 @@ use src\Exceptions\FileNotFoundException;
 
 class Encryption extends Crypt
 {
-    private StreamInterface $stream;
-
-    private string $macKey;
-
-    private MediaTypeEnum $mediaType;
+    protected string $macKey;
 
     /**
      * принимает файл, возвращает строоку зашифрованных байтов
@@ -30,15 +26,18 @@ class Encryption extends Crypt
         ?string $keyFileName = null,
     ): string {
         $stream = $this->getStreamFromFile($filePath);
-        $mediaType = $this->getMediaType($filePath);
+        $this->stream = $stream;
 
-        return $this->encryptStreamData($stream, $mediaType, $keyFileName);
+        $mediaType = $this->getMediaType($filePath);
+        $this->mediaType = $mediaType;
+
+        return $this->encryptStreamData($mediaType, $keyFileName);
     }
 
     /**
      * @throws RandomException
      */
-    private function generateMediaKey(): string
+    protected function generateMediaKey(): string
     {
         // Generate a mediaKey (32 bytes)
         $mediaKey = random_bytes(self::MEDIA_KEY_LENGTH);
@@ -53,8 +52,7 @@ class Encryption extends Crypt
      * @throws RandomException
      * @throws FileNotFoundException
      */
-    private function encryptStreamData(
-        StreamInterface $stream,
+    protected function encryptStreamData(
         MediaTypeEnum $mediaType,
         ?string $keyFileName,
     ): string {
@@ -71,12 +69,11 @@ class Encryption extends Crypt
 
         //3. Split `mediaKeyExpanded`
         [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
-        $this->stream = $stream;
-        $this->mediaType = $mediaType;
         $this->macKey = $macKey;
+        $this->iv = $iv;
 
         //4. Encrypt the file
-        $enc = $this->encrypt($stream, $cipherKey, $iv);
+        $enc = $this->encrypt($cipherKey);
 
         //5. Sign `iv + enc` with `macKey`
         $mac = $this->getMac($iv, $enc, $macKey);
@@ -88,18 +85,17 @@ class Encryption extends Crypt
     /**
      * @throws CryptException
      */
-    private function encrypt(StreamInterface $stream, string $cipherKey, string $iv): string
+    protected function encrypt(string $cipherKey): string
     {
         // Initialize the encryption buffer
         $encryptedData = '';
-        $this->iv = $iv;
         // Encrypt the stream data chunk by chunk
-        while (! $stream->eof()) {
+        while (! $this->stream->eof()) {
             // Read a chunk of data from the stream
-            $chunk = $stream->read(self::BLOCK_SIZE);
+            $chunk = $this->stream->read(self::BLOCK_SIZE);
 
             // Check if this is the last chunk
-            $isLastChunk = $stream->eof();
+            $isLastChunk = $this->stream->eof();
 
             $options = OPENSSL_RAW_DATA;
             // Apply padding only if it's not the last chunk
@@ -109,10 +105,10 @@ class Encryption extends Crypt
 
             // Encrypt the chunk of data
             $encryptedChunk = openssl_encrypt(
-                $chunk,
-                self::CIPHER_ALGORITHM,
-                $cipherKey,
-                $options,
+                data: $chunk,
+                cipher_algo:  self::CIPHER_ALGORITHM,
+                passphrase: $cipherKey,
+                options: $options,
                 iv: $this->getCurrentIv(),
             );
 
@@ -140,7 +136,7 @@ class Encryption extends Crypt
     /**
      * This will generate the sidecar for the streamable media.
      */
-    private function generateSidecar(): string
+    protected function generateSidecar(): string
     {
         // Initialize the sidecar buffer
         $sidecar = '';

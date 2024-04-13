@@ -25,6 +25,9 @@ abstract class Crypt
 
     protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
 
+    protected MediaTypeEnum $mediaType;
+    protected StreamInterface $stream;
+
     protected string $iv;
 
     /**

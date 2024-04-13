@@ -4,15 +4,13 @@ namespace src;
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
-use src\Crypt;
-use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
 use src\Exceptions\FileNotFoundException;
 
 class Decryption extends Crypt
 {
-    private function unpad($data): string
+    protected function unpad($data): string
     {
         $padding = ord($data[strlen($data) - 1]);
 
@@ -24,28 +22,30 @@ class Decryption extends Crypt
      * @throws CryptException
      * @throws FileNotFoundException
      */
-    private function decryptStreamData(StreamInterface $stream, MediaTypeEnum $mediaType, string $keyFileName): string
+    protected function decryptStreamData(string $keyFileName): string
     {
         //1. Obtain `mediaKey`.
         $mediaKey = $this->getMediaKeyFromFile($keyFileName);
 
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey, $mediaType);
+        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
 
         //3. Split `mediaKeyExpanded`
         [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        $this->iv = $iv;
 
         //4. Obtain file and mac
-        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia($stream);
+        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
+        $this->stream = $this->stringToStream($file);
 
         //5. Validate media data
         $this->validateMediaData($file, $mac, $iv, $macKey);
 
         //6. Decrypt `file`
-        return $this->decrypt($this->stringToStream($file), $cipherKey, $iv);
+        return $this->decrypt($cipherKey);
     }
 
-    private function stringToStream(string $data): StreamInterface
+    protected function stringToStream(string $data): StreamInterface
     {
         $stream = fopen('php://temp', 'r+');
         fwrite($stream, $data);
@@ -54,13 +54,10 @@ class Decryption extends Crypt
         return new Stream($stream);
     }
 
-    private function getFileAndMacFromEncryptedMedia(StreamInterface $stream): array
+    protected function getFileAndMacFromEncryptedMedia(): array
     {
-        // Get the current position of the stream
-        $currentPosition = $stream->tell();
-
         // Read the stream and split the encrypted media data and MAC
-        $mediaData = (string) $stream;
+        $mediaData = (string) $this->stream;
 
         // Extract the encrypted file data
         $encryptedFile = substr($mediaData, 0, -self::MAC_LENGTH);
@@ -69,7 +66,7 @@ class Decryption extends Crypt
         $mac = substr($mediaData, -self::MAC_LENGTH);
 
         // Rewind the stream to its original position
-        $stream->seek($currentPosition);
+        $this->stream->rewind();
 
         return [$encryptedFile, $mac];
     }
@@ -77,7 +74,7 @@ class Decryption extends Crypt
     /**
      * @throws CryptException
      */
-    private function validateMediaData(
+    protected function validateMediaData(
         string $encryptedFile,
         string $mac,
         string $iv,
@@ -92,28 +89,22 @@ class Decryption extends Crypt
         }
     }
 
-
     /**
      * @throws CryptException
      */
-    private function decrypt(StreamInterface $stream, string $cipherKey, string $iv): string
+    protected function decrypt(string $cipherKey): string
     {
-        // Initialize the decryption buffer
         $decryptedData = '';
 
-        $this->iv = $iv;
-        //дешифрование чанками не работает
-        // Decrypt the stream data chunk by chunk
-        while (! $stream->eof()) {
+        while (! $this->stream->eof()) {
 
             // Read a chunk of data from the stream
-            $encryptedChunk = $stream->read(self::BLOCK_SIZE);
-            $isLastChunk = $stream->eof();
+            $encryptedChunk = $this->stream->read(self::BLOCK_SIZE);
+            $isLastChunk = $this->stream->eof();
 
             if ($isLastChunk) {
                 break;
             }
-            // Decrypt the chunk of data
             $decryptedChunk = openssl_decrypt(
                 data: $encryptedChunk,
                 cipher_algo: self::CIPHER_ALGORITHM,
@@ -125,12 +116,11 @@ class Decryption extends Crypt
             if ($decryptedChunk === false) {
                 throw new CryptException('Decrypted data failed: '.openssl_error_string());
             }
-            // Append the decrypted chunk to the decrypted data
+
             $decryptedData .= $decryptedChunk;
             $this->updateIv($encryptedChunk);
         }
 
-        // Unpad the decrypted file
         return $this->unpad($decryptedData);
     }
 
@@ -143,10 +133,12 @@ class Decryption extends Crypt
         string $keyFileName = self::DEFAULT_MEDIA_KEY_FILE_NAME,
     ): string {
         $stream = $this->getStreamFromFile($filePath);
-        $mediaType = $this->getMediaType($filePath);
+        $this->stream = $stream;
 
-        // Decrypt the stream data one by one
-        return $this->decryptStreamData($stream, $mediaType, $keyFileName);
+        $mediaType = $this->getMediaType($filePath);
+        $this->mediaType = $mediaType;
+
+        return $this->decryptStreamData($keyFileName);
     }
 
 }
