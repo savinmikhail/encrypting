@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 namespace Mikhail\Encryptor;
-require 'vendor/autoload.php';
-require_once __DIR__ . '/../src/Crypt.php';
 
 use Random\RandomException;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;

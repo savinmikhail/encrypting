@@ -1,14 +1,14 @@
 <?php
 
-namespace Mikhail\Tests\Encryption;
-require __DIR__ . '/../vendor/autoload.php';
+namespace Mikhail\Tests\Encyptor;
+//require __DIR__ . '/../vendor/autoload.php';
 
 use Mikhail\Encryptor\Decryption;
 use PHPUnit\Framework\TestCase;
 
 class DecryptionTest extends TestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
+    private const /*string*/ TEST_FILES_FOLDER = 'tests/testFiles/';
 
     private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
 

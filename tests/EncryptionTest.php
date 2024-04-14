@@ -1,6 +1,6 @@
 <?php
 
-namespace Mikhail\Tests\Encryption;
+namespace Mikhail\Tests\Encyptor;
 
 require __DIR__ . '/../vendor/autoload.php';
 require 'vendor/autoload.php';
@@ -10,14 +10,17 @@ use PHPUnit\Framework\TestCase;
 
 class EncryptionTest extends TestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
+    private const /*string*/ TEST_FILES_FOLDER = 'tests/testFiles/';
 
     private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
 
+    /** @var Encryption $encryption */
     private Encryption $encryption;
 
     public function setUp(): void
     {
+        /** @property Encryption $encryption */
+
         $this->encryption = new Encryption();
     }
 

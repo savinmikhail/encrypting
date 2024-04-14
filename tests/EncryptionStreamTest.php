@@ -1,8 +1,8 @@
 <?php
 
-namespace Mikhail\Tests\Encryption;
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/EncryptingStream.php';
+namespace Mikhail\Tests\Encyptor;
+//require __DIR__ . '/../vendor/autoload.php';
+//require __DIR__ . '/../src/EncryptingStream.php';
 
 use GuzzleHttp\Psr7\Utils;
 use Mikhail\Encryptor\DecryptingStream;
