@@ -1,14 +1,10 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryption;
+require __DIR__ . '/../vendor/autoload.php';
 
+use Mikhail\Encryptor\Decryption;
 use PHPUnit\Framework\TestCase;
-use src\Decryption;
-use src\Encryption;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
 
 class DecryptionTest extends TestCase
 {
@@ -62,9 +58,9 @@ class DecryptionTest extends TestCase
 
         file_put_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg', $decryptedString);
 
-        $this->assertEquals(
-            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
-            file_get_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg')
-        );
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg');
+        $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'IMAGE.jpeg');
+
+        $this->assertEquals($originalHash, $decryptedHash);
     }
 }

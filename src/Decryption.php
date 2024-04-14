@@ -1,12 +1,13 @@
 <?php
 
-namespace src;
+namespace Mikhail\Encryptor;
+require 'vendor/autoload.php';
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
-use src\Exceptions\FileNotFoundException;
+use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
+use Mikhail\Encryptor\Exceptions\CryptException;
+use Mikhail\Encryptor\Exceptions\FileNotFoundException;
 
 class Decryption extends Crypt
 {

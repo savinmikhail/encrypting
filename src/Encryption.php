@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace src;
+namespace Mikhail\Encryptor;
+require 'vendor/autoload.php';
+require_once __DIR__ . '/../src/Crypt.php';
 
-use GuzzleHttp\Psr7\Stream;
-use Psr\Http\Message\StreamInterface;
 use Random\RandomException;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
+use Mikhail\Encryptor\Exceptions\CryptException;
+use Mikhail\Encryptor\Exceptions\FileNotFoundException;
 
 class Encryption extends Crypt
 {

@@ -1,13 +1,15 @@
 <?php
 
-namespace src;
+namespace Mikhail\Encryptor;
+require 'vendor/autoload.php';
+require __DIR__ . '/../src/Enums/MediaTypeEnum.php';
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
+use Mikhail\Encryptor\Exceptions\EmptyFileException;
+use Mikhail\Encryptor\Exceptions\FileNotFoundException;
 
 abstract class Crypt
 {
@@ -23,9 +25,10 @@ abstract class Crypt
 
     protected const /*int*/ MAC_LENGTH = 10;
 
-    protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
+    protected const /*int*/ BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
 
     protected MediaTypeEnum $mediaType;
+
     protected StreamInterface $stream;
 
     protected string $iv;

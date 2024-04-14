@@ -1,16 +1,19 @@
 <?php
 
-namespace src;
+namespace Mikhail\Encryptor;
+require 'vendor/autoload.php';
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use Psr\Http\Message\StreamInterface;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CryptException;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CryptException;
 
 class DecryptingStream extends Decryption implements StreamInterface
 {
     use StreamDecoratorTrait;
+
     protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
+
     protected const /*string*/ CIPHER_ALGORITHM = 'aes-256-cbc';
 
     public function __construct(protected StreamInterface $stream)

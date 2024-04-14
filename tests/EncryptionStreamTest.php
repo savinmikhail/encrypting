@@ -1,11 +1,13 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryption;
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../src/EncryptingStream.php';
 
-use PHPUnit\Framework\TestCase;
-use src\DecryptingStream;
-use src\EncryptingStream;
 use GuzzleHttp\Psr7\Utils;
+use Mikhail\Encryptor\DecryptingStream;
+use Mikhail\Encryptor\EncryptingStream;
+use PHPUnit\Framework\TestCase;
 
 class EncryptionStreamTest extends TestCase
 {

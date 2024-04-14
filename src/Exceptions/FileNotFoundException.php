@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Exceptions;
+namespace Mikhail\Encryptor\Exceptions;
 
 use Exception;
 

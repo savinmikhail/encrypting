@@ -1,11 +1,12 @@
 <?php
 
-namespace src;
+namespace Mikhail\Encryptor;
+require 'vendor/autoload.php';
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use Psr\Http\Message\StreamInterface;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CryptException;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CryptException;
 
 class EncryptingStream extends Encryption implements StreamInterface
 {
@@ -37,6 +38,7 @@ class EncryptingStream extends Encryption implements StreamInterface
         $count = ceil($length/self::BLOCK_SIZE);
         $encryptedData = '';
         $mediaKey = $this->generateMediaKey();
+
         //2. Expand it
         $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
 
