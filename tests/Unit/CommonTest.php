@@ -10,11 +10,12 @@ use src\Exceptions\CryptException;
 use src\Exceptions\EmptyFileException;
 use src\Exceptions\FileNotFoundException;
 
-class CommonTest  extends TestCase
+class CommonTest extends TestCase
 {
     private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
 
     private Decryption $decryption;
+
     private Encryption $encryption;
 
     public function setUp(): void
@@ -80,7 +81,6 @@ class CommonTest  extends TestCase
 
         $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png');
         file_put_contents(self::TEST_FILES_FOLDER.'myImageDec.png', $decryptedString);
-
 
         $originalHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImage.png');
         $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImageDec.png');

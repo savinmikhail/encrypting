@@ -23,9 +23,10 @@ abstract class Crypt
 
     protected const /*int*/ MAC_LENGTH = 10;
 
-    protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
+    protected const /*int*/ BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
 
     protected MediaTypeEnum $mediaType;
+
     protected StreamInterface $stream;
 
     protected string $iv;

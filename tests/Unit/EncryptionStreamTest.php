@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use src\DecryptingStream;
 use src\EncryptingStream;
-use GuzzleHttp\Psr7\Utils;
 
 class EncryptionStreamTest extends TestCase
 {
@@ -32,7 +32,7 @@ class EncryptionStreamTest extends TestCase
 
     public function testStreamReadingBehavior()
     {
-//        $this->markTestIncomplete();
+        //        $this->markTestIncomplete();
         // Arrange
         $plaintext = 'Hello, world!';
         $stream = Utils::streamFor($plaintext);
@@ -56,7 +56,7 @@ class EncryptionStreamTest extends TestCase
 
         // Act
         $encryptedData = $encryptingStream->read(10);
-//        dd($encryptedData);
+        //        dd($encryptedData);
         //& Assert
         $this->assertEmpty($encryptedData);
     }

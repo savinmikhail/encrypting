@@ -74,7 +74,7 @@ class EncryptionTest extends TestCase
 
         $sideCar = $this->encryption->getSideCar();
 
-//        dd($sideCar, file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.sidecar'));
+        //        dd($sideCar, file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.sidecar'));
         file_put_contents(self::TEST_FILES_FOLDER.'video.sidecar', $sideCar);
 
         //assert

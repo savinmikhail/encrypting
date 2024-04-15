@@ -140,5 +140,4 @@ class Decryption extends Crypt
 
         return $this->decryptStreamData($keyFileName);
     }
-
 }

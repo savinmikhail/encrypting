@@ -4,11 +4,6 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use src\Decryption;
-use src\Encryption;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
 
 class DecryptionTest extends TestCase
 {

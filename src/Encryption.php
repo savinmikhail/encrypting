@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace src;
 
 use GuzzleHttp\Psr7\Stream;
-use Psr\Http\Message\StreamInterface;
 use Random\RandomException;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
-use src\Exceptions\EmptyFileException;
 use src\Exceptions\FileNotFoundException;
 
 class Encryption extends Crypt
@@ -106,7 +104,7 @@ class Encryption extends Crypt
             // Encrypt the chunk of data
             $encryptedChunk = openssl_encrypt(
                 data: $chunk,
-                cipher_algo:  self::CIPHER_ALGORITHM,
+                cipher_algo: self::CIPHER_ALGORITHM,
                 passphrase: $cipherKey,
                 options: $options,
                 iv: $this->getCurrentIv(),
@@ -130,6 +128,7 @@ class Encryption extends Crypt
         if (in_array($this->mediaType->name, ['AUDIO', 'VIDEO'])) {
             $sidecar = $this->generateSidecar();
         }
+
         return $sidecar;
     }
 
@@ -157,6 +156,7 @@ class Encryption extends Crypt
             // Append the signed chunk to the sidecar
             $sidecar .= $mac;
         }
+
         return $sidecar;
     }
 }

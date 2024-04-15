@@ -10,8 +10,6 @@ use src\Exceptions\CryptException;
 class DecryptingStream extends Decryption implements StreamInterface
 {
     use StreamDecoratorTrait;
-    protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
-    protected const /*string*/ CIPHER_ALGORITHM = 'aes-256-cbc';
 
     public function __construct(protected StreamInterface $stream)
     {
@@ -29,7 +27,7 @@ class DecryptingStream extends Decryption implements StreamInterface
 
     private function decryptBlock(int $length): string
     {
-        $this->mediaType =  MediaTypeEnum::DOCUMENT;
+        $this->mediaType = MediaTypeEnum::DOCUMENT;
 
         $keyFileName = 'mediaKey.txt';
         //1. Obtain `mediaKey`.
@@ -42,17 +40,17 @@ class DecryptingStream extends Decryption implements StreamInterface
         $this->iv = $iv;
 
         //4. Obtain file and mac
-//        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
-//        $this->stream = $this->stringToStream($file);
+        //        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
+        //        $this->stream = $this->stringToStream($file);
 
         //5. Validate media data
-//        $this->validateMediaData($file, $mac, $iv, $macKey);
+        //        $this->validateMediaData($file, $mac, $iv, $macKey);
 
         //6. Decrypt `file`
         $decryptedData = '';
-        $count = ceil($length/self::BLOCK_SIZE);
+        $count = ceil($length / self::BLOCK_SIZE);
 
-        while ($count > 0 || !$this->stream->eof()) {
+        while ($count > 0 || ! $this->stream->eof()) {
 
             // Read a chunk of data from the stream
             $encryptedChunk = $this->stream->read(self::BLOCK_SIZE);
@@ -77,11 +75,11 @@ class DecryptingStream extends Decryption implements StreamInterface
             $this->updateIv($encryptedChunk);
         }
 
-        if($this->stream->eof()){
+        if ($this->stream->eof()) {
             return $this->unpad($decryptedData);
         }
+
         return $decryptedData;
 
     }
-
 }

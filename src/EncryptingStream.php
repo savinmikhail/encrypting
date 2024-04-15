@@ -10,8 +10,6 @@ use src\Exceptions\CryptException;
 class EncryptingStream extends Encryption implements StreamInterface
 {
     use StreamDecoratorTrait;
-    protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
-    protected const /*string*/ CIPHER_ALGORITHM = 'aes-256-cbc';
 
     public function __construct(protected StreamInterface $stream)
     {
@@ -24,7 +22,7 @@ class EncryptingStream extends Encryption implements StreamInterface
 
     public function read($length): string
     {
-           return $this->encryptBlock($length);
+        return $this->encryptBlock($length);
     }
 
     private function encryptBlock(int $length): string
@@ -32,9 +30,9 @@ class EncryptingStream extends Encryption implements StreamInterface
         if ($this->stream->eof()) {
             return '';
         }
-        $this->mediaType =  MediaTypeEnum::DOCUMENT;
+        $this->mediaType = MediaTypeEnum::DOCUMENT;
 
-        $count = ceil($length/self::BLOCK_SIZE);
+        $count = ceil($length / self::BLOCK_SIZE);
         $encryptedData = '';
         $mediaKey = $this->generateMediaKey();
         //2. Expand it
@@ -59,7 +57,7 @@ class EncryptingStream extends Encryption implements StreamInterface
             // Encrypt the chunk of data
             $encryptedChunk = openssl_encrypt(
                 data: $chunk,
-                cipher_algo:  self::CIPHER_ALGORITHM,
+                cipher_algo: self::CIPHER_ALGORITHM,
                 passphrase: $cipherKey,
                 options: $options,
                 iv: $this->getCurrentIv(),
@@ -73,11 +71,8 @@ class EncryptingStream extends Encryption implements StreamInterface
             $encryptedData .= $encryptedChunk;
             $this->updateIv($encryptedChunk);
             $count--;
-        } while ($count > 0 || !$this->stream->eof());
-
-
+        } while ($count > 0 || ! $this->stream->eof());
 
         return $encryptedData;
     }
-
 }
