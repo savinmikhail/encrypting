@@ -14,8 +14,6 @@ class CommonTest  extends TestCase
 {
     private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
 
-    private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
-
     private Decryption $decryption;
     private Encryption $encryption;
 
