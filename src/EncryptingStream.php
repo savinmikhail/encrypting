@@ -1,12 +1,11 @@
 <?php
 
 namespace Mikhail\Encryptor;
-require 'vendor/autoload.php';
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
-use Psr\Http\Message\StreamInterface;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Mikhail\Encryptor\Exceptions\CryptException;
+use Psr\Http\Message\StreamInterface;
 
 class EncryptingStream extends Encryption implements StreamInterface
 {

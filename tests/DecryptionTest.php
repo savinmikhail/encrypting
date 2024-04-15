@@ -1,7 +1,6 @@
 <?php
 
 namespace Mikhail\Tests\Encyptor;
-//require __DIR__ . '/../vendor/autoload.php';
 
 use Mikhail\Encryptor\Decryption;
 use PHPUnit\Framework\TestCase;

@@ -1,7 +1,6 @@
 <?php
 
 namespace Mikhail\Encryptor;
-require 'vendor/autoload.php';
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;

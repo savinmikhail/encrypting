@@ -1,8 +1,6 @@
 <?php
 
 namespace Mikhail\Encryptor;
-require 'vendor/autoload.php';
-require __DIR__ . '/../src/Enums/MediaTypeEnum.php';
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;

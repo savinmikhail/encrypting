@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Mikhail\Encryptor;
 
-use Random\RandomException;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
 use Mikhail\Encryptor\Exceptions\CryptException;
 use Mikhail\Encryptor\Exceptions\FileNotFoundException;
+use Random\RandomException;
 
 class Encryption extends Crypt
 {

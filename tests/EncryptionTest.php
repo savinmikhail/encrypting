@@ -2,9 +2,6 @@
 
 namespace Mikhail\Tests\Encyptor;
 
-require __DIR__ . '/../vendor/autoload.php';
-require 'vendor/autoload.php';
-
 use Mikhail\Encryptor\Encryption;
 use PHPUnit\Framework\TestCase;
 

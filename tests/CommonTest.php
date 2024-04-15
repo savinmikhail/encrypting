@@ -1,15 +1,6 @@
 <?php
 
 namespace Mikhail\Tests\Encyptor;
-//require __DIR__ . '/../vendor/autoload.php';
-//require __DIR__ . '/../src/Encryption.php';
-//require __DIR__ . '/../src/Decryption.php';
-//require __DIR__ . '/../src/Exceptions/FileNotFoundException.php';
-//require __DIR__ . '/../src/Exceptions/EmptyFileException.php';
-//require __DIR__ . '/../src/Exceptions/CryptException.php';
-//require __DIR__ . '/../src/Exceptions/CorruptedMediaKeyException.php';
-//
-//require __DIR__ . '/../src/Crypt.php';
 
 use Mikhail\Encryptor\Decryption;
 use Mikhail\Encryptor\Encryption;
