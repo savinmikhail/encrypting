@@ -11,7 +11,7 @@ class DecryptingStream extends Decryption implements StreamInterface
 {
     use StreamDecoratorTrait;
 
-    public function __construct(protected StreamInterface $stream)
+    public function __construct(protected StreamInterface $stream, protected MediaTypeEnum $mediaType)
     {
     }
 
@@ -27,17 +27,13 @@ class DecryptingStream extends Decryption implements StreamInterface
 
     private function decryptBlock(int $length): string
     {
-        $this->mediaType = MediaTypeEnum::DOCUMENT;
-
-        $keyFileName = 'mediaKey.txt';
         //1. Obtain `mediaKey`.
-        $mediaKey = $this->getMediaKeyFromFile($keyFileName);
+        $mediaKey = file_get_contents('mediaKey.txt');
         //2. Expand it
         $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
 
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
-        $this->iv = $iv;
+        [$this->iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
 
         //4. Obtain file and mac
         //        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();

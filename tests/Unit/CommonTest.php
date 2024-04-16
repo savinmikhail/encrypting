@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use src\Decryption;
 use src\Encryption;
 use src\Exceptions\CorruptedMediaKeyException;
@@ -10,10 +9,8 @@ use src\Exceptions\CryptException;
 use src\Exceptions\EmptyFileException;
 use src\Exceptions\FileNotFoundException;
 
-class CommonTest extends TestCase
+class CommonTest extends BaseTestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
-
     private Decryption $decryption;
 
     private Encryption $encryption;
@@ -36,19 +33,10 @@ class CommonTest extends TestCase
         $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'empty_file.txt');
     }
 
-    public function testEncryptionDecryptionWithInvalidKeyFile()
-    {
-        $this->expectException(FileNotFoundException::class);
-        $this->encryption->encryptFile(
-            self::TEST_FILES_FOLDER.'orig.txt',
-            'path/to/invalid_key.txt'
-        );
-    }
-
     public function testEncryptionDecryptionWithCorruptedEncryptedFile()
     {
         $this->expectException(CryptException::class);
-        $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt');
+        $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt', file_get_contents('mediaKey.txt'));
     }
 
     public function testEncryptionDecryptionWithIncorrectMediaKey()
@@ -56,7 +44,7 @@ class CommonTest extends TestCase
         $this->expectException(CorruptedMediaKeyException::class);
         $this->decryption->decryptFile(
             self::TEST_FILES_FOLDER.'enc.txt',
-            self::TEST_FILES_FOLDER.'incorrect_media_key.txt'
+            file_get_contents(self::TEST_FILES_FOLDER.'incorrect_media_key.txt')
         );
     }
 
@@ -65,7 +53,7 @@ class CommonTest extends TestCase
         $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'orig.txt');
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
 
-        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'enc.txt');
+        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'enc.txt', file_get_contents('mediaKey.txt'));
         file_put_contents(self::TEST_FILES_FOLDER.'dec.txt', $decryptedString);
 
         $this->assertEquals(
@@ -79,7 +67,7 @@ class CommonTest extends TestCase
         $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'myImage.png');
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);
 
-        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png');
+        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png', file_get_contents('mediaKey.txt'));
         file_put_contents(self::TEST_FILES_FOLDER.'myImageDec.png', $decryptedString);
 
         $originalHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImage.png');

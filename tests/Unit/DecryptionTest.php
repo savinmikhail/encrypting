@@ -2,15 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use src\Decryption;
 
-class DecryptionTest extends TestCase
+class DecryptionTest extends BaseTestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
-
-    private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
-
     private Decryption $decryption;
 
     public function setUp(): void
@@ -22,7 +17,7 @@ class DecryptionTest extends TestCase
     {
         $decryptedString = $this->decryption->decryptFile(
             self::SAMPLES_FILES_FOLDER.'audioEnc.mp3',
-            self::SAMPLES_FILES_FOLDER.'AUDIO.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key'),
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'AUDIO.mp3', $decryptedString);
@@ -37,7 +32,7 @@ class DecryptionTest extends TestCase
     {
         $decryptedString = $this->decryption->decryptFile(
             self::SAMPLES_FILES_FOLDER.'videoEnc.mp4',
-            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key'),
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'VIDEO.mp4', $decryptedString);
@@ -52,7 +47,7 @@ class DecryptionTest extends TestCase
     {
         $decryptedString = $this->decryption->decryptFile(
             self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg',
-            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key'),
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg', $decryptedString);

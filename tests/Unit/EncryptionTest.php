@@ -2,15 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use src\Encryption;
 
-class EncryptionTest extends TestCase
+class EncryptionTest extends BaseTestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
-
-    private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
-
     private Encryption $encryption;
 
     public function setUp(): void
@@ -22,7 +17,7 @@ class EncryptionTest extends TestCase
     {
         $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
-            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'imageEnc.jpeg', $decryptedString);
@@ -37,7 +32,7 @@ class EncryptionTest extends TestCase
     {
         $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'AUDIO.mp3',
-            self::SAMPLES_FILES_FOLDER.'AUDIO.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key')
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'audioEnc.mp3', $decryptedString);
@@ -52,7 +47,7 @@ class EncryptionTest extends TestCase
     {
         $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
-            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $decryptedString);
@@ -69,7 +64,7 @@ class EncryptionTest extends TestCase
         //act
         $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
-            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
 
         $sideCar = $this->encryption->getSideCar();
@@ -89,7 +84,7 @@ class EncryptionTest extends TestCase
         //act
         $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
-            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
         $sideCar = $this->encryption->getSideCar();

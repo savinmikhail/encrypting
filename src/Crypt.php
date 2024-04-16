@@ -63,26 +63,6 @@ abstract class Crypt
         };
     }
 
-    /**
-     * @throws CorruptedMediaKeyException
-     * @throws FileNotFoundException
-     */
-    protected function getMediaKeyFromFile(string $keyFileName): string
-    {
-        if (! file_exists($keyFileName)) {
-            throw new FileNotFoundException('mediaKey not found');
-        }
-
-        // Obtain mediaKey (your implementation to obtain the media key)
-        $mediaKey = file_get_contents($keyFileName);
-
-        if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
-            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
-        }
-
-        return $mediaKey;
-    }
-
     protected function getCurrentIv(): string
     {
         return $this->iv;

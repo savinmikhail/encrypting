@@ -11,8 +11,11 @@ class EncryptingStream extends Encryption implements StreamInterface
 {
     use StreamDecoratorTrait;
 
-    public function __construct(protected StreamInterface $stream)
-    {
+    public function __construct(
+        protected StreamInterface $stream,
+        protected MediaTypeEnum $mediaType,
+        protected ?string $mediaKey = null,
+    ) {
     }
 
     public function isWritable(): false
@@ -25,41 +28,44 @@ class EncryptingStream extends Encryption implements StreamInterface
         return $this->encryptBlock($length);
     }
 
+    protected function getBlockAmount(int $length): int
+    {
+        return ceil($length / self::BLOCK_SIZE);
+    }
+
+    protected function getMediaKey(): void
+    {
+        if ($this->mediaKey === null) {
+            $this->mediaKey = $this->generateMediaKey();
+        }
+    }
+
     private function encryptBlock(int $length): string
     {
         if ($this->stream->eof()) {
             return '';
         }
-        $this->mediaType = MediaTypeEnum::DOCUMENT;
+        //1. Use provided media key or generate the new one
+        $this->getMediaKey();
 
-        $count = ceil($length / self::BLOCK_SIZE);
-        $encryptedData = '';
-        $mediaKey = $this->generateMediaKey();
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
+        $mediaKeyExpanded = $this->getExpandedMediaKey($this->mediaKey);
 
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
-        $this->macKey = $macKey;
-        $this->iv = $iv;
+        [$this->iv , $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
 
-        do {
+        $count = $this->getBlockAmount($length);
+        $encryptedData = '';
+
+        while ($count > 0 || ! $this->stream->eof()) {
             $chunk = $this->stream->read(self::BLOCK_SIZE);
-            // Check if this is the last chunk
-            $isLastChunk = $this->stream->eof();
-
-            $options = OPENSSL_RAW_DATA;
-            // Apply padding only if it's not the last chunk
-            if (! $isLastChunk) {
-                $options |= OPENSSL_ZERO_PADDING;
-            }
 
             // Encrypt the chunk of data
             $encryptedChunk = openssl_encrypt(
                 data: $chunk,
                 cipher_algo: self::CIPHER_ALGORITHM,
                 passphrase: $cipherKey,
-                options: $options,
+                options: $this->getOptions(),
                 iv: $this->getCurrentIv(),
             );
 
@@ -71,8 +77,13 @@ class EncryptingStream extends Encryption implements StreamInterface
             $encryptedData .= $encryptedChunk;
             $this->updateIv($encryptedChunk);
             $count--;
-        } while ($count > 0 || ! $this->stream->eof());
+        }
 
-        return $encryptedData;
+        //5. Sign `iv + enc` with `macKey`
+        $mac = $this->getMac($this->iv, $encryptedData, $this->macKey);
+
+        //6. Append `mac` to the `enc`
+        return $encryptedData.$mac;
     }
+
 }

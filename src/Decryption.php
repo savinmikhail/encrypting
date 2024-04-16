@@ -2,14 +2,15 @@
 
 namespace src;
 
-use GuzzleHttp\Psr7\Stream;
-use Psr\Http\Message\StreamInterface;
+use GuzzleHttp\Psr7\Utils;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
 use src\Exceptions\FileNotFoundException;
 
 class Decryption extends Crypt
 {
+    protected string $macKey;
+
     protected function unpad($data): string
     {
         $padding = ord($data[strlen($data) - 1]);
@@ -22,36 +23,29 @@ class Decryption extends Crypt
      * @throws CryptException
      * @throws FileNotFoundException
      */
-    protected function decryptStreamData(string $keyFileName): string
+    protected function decryptStreamData(string $mediaKey): string
     {
         //1. Obtain `mediaKey`.
-        $mediaKey = $this->getMediaKeyFromFile($keyFileName);
+        if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
+            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
+        }
 
         //2. Expand it
         $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
 
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
         $this->iv = $iv;
 
         //4. Obtain file and mac
         [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
-        $this->stream = $this->stringToStream($file);
+        $this->stream = Utils::streamFor($file);
 
         //5. Validate media data
-        $this->validateMediaData($file, $mac, $iv, $macKey);
+        $this->validateMediaData($file, $mac, $iv, $this->macKey);
 
         //6. Decrypt `file`
         return $this->decrypt($cipherKey);
-    }
-
-    protected function stringToStream(string $data): StreamInterface
-    {
-        $stream = fopen('php://temp', 'r+');
-        fwrite($stream, $data);
-        rewind($stream);
-
-        return new Stream($stream);
     }
 
     protected function getFileAndMacFromEncryptedMedia(): array
@@ -62,13 +56,23 @@ class Decryption extends Crypt
         // Extract the encrypted file data
         $encryptedFile = substr($mediaData, 0, -self::MAC_LENGTH);
 
-        // Extract the MAC from the end of the encrypted data
-        $mac = substr($mediaData, -self::MAC_LENGTH);
-
         // Rewind the stream to its original position
         $this->stream->rewind();
 
-        return [$encryptedFile, $mac];
+        return [$encryptedFile, $this->getMacFromEncryptedMedia()];
+    }
+
+    protected function getMacFromEncryptedMedia(): string
+    {
+        $mediaLength = $this->stream->getSize(); // Assuming the stream supports size
+
+        // Seek to the beginning of the MAC (excluding data)
+        $this->stream->seek($mediaLength - self::MAC_LENGTH);
+
+        // Read the MAC
+        $mac = $this->stream->read(self::MAC_LENGTH);
+        $this->stream->rewind();
+        return $mac;
     }
 
     /**
@@ -100,6 +104,8 @@ class Decryption extends Crypt
 
             // Read a chunk of data from the stream
             $encryptedChunk = $this->stream->read(self::BLOCK_SIZE);
+
+            //the last chunk is always empty string, so it is impossible to decrypt
             $isLastChunk = $this->stream->eof();
 
             if ($isLastChunk) {
@@ -130,14 +136,11 @@ class Decryption extends Crypt
     public function decryptFile(
         string $filePath,
         /** здесь либо пользователь предоставляет нужный ключ, либо берем потенциально последний сгенеренный */
-        string $keyFileName = self::DEFAULT_MEDIA_KEY_FILE_NAME,
+        string $mediaKey,
     ): string {
-        $stream = $this->getStreamFromFile($filePath);
-        $this->stream = $stream;
+        $this->stream = $this->getStreamFromFile($filePath);
+        $this->mediaType = $this->getMediaType($filePath);
 
-        $mediaType = $this->getMediaType($filePath);
-        $this->mediaType = $mediaType;
-
-        return $this->decryptStreamData($keyFileName);
+        return $this->decryptStreamData($mediaKey);
     }
 }
