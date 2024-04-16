@@ -42,7 +42,7 @@ class CommonTest extends BaseTestCase
 
     public function testEncryptionDecryptionWithStringData()
     {
-        $encryptedString = $this->encryption->encryptFile(
+        $encryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::TEST_FILES_FOLDER.'orig.txt'),
             MediaTypeEnum::DOCUMENT,
         );
@@ -63,7 +63,7 @@ class CommonTest extends BaseTestCase
 
     public function testEncryptionDecryptionWithCustomImage()
     {
-        $encryptedString = $this->encryption->encryptFile(
+        $encryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::TEST_FILES_FOLDER.'myImage.png'),
             MediaTypeEnum::IMAGE,
         );

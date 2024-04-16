@@ -17,21 +17,6 @@ class Encryption extends Crypt
     protected string $macKey;
 
     /**
-     * принимает файл, возвращает строоку зашифрованных байтов
-     */
-    public function encryptFile(
-        StreamInterface $stream,
-        MediaTypeEnum $mediaType,
-        /** здесь ключ опционален, если не предоставлен, то сгенерим сами */
-        ?string $mediaKey = null,
-    ): string {
-        $this->stream = $stream;
-        $this->mediaType = $mediaType;
-
-        return $this->encryptStreamData($mediaKey);
-    }
-
-    /**
      * @throws RandomException
      */
     protected function generateMediaKey(): string
@@ -48,9 +33,15 @@ class Encryption extends Crypt
      * @throws CryptException
      * @throws RandomException
      */
-    protected function encryptStreamData(
-        ?string $mediaKey,
+    public function encryptStream(
+        StreamInterface $stream,
+        MediaTypeEnum $mediaType,
+        /** здесь ключ опционален, если не предоставлен, то сгенерим сами */
+        ?string $mediaKey = null,
     ): string {
+        $this->stream = $stream;
+        $this->mediaType = $mediaType;
+
         if ($mediaKey === null) {
             //1.1  generate new mediaKey
             $mediaKey = $this->generateMediaKey();

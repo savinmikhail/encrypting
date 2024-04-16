@@ -16,7 +16,7 @@ class EncryptionTest extends BaseTestCase
 
     public function testEncryptionWithImage()
     {
-        $decryptedString = $this->encryption->encryptFile(
+        $decryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
             MediaTypeEnum::IMAGE,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
@@ -32,7 +32,7 @@ class EncryptionTest extends BaseTestCase
 
     public function testEncryptionWithAudio()
     {
-        $decryptedString = $this->encryption->encryptFile(
+        $decryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'AUDIO.mp3'),
             MediaTypeEnum::AUDIO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key')
@@ -48,7 +48,7 @@ class EncryptionTest extends BaseTestCase
 
     public function testEncryptionWithVideo()
     {
-        $decryptedString = $this->encryption->encryptFile(
+        $decryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),
             MediaTypeEnum::VIDEO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
@@ -66,7 +66,7 @@ class EncryptionTest extends BaseTestCase
     {
         $this->markTestSkipped('anyway not working');
         //act
-        $this->encryption->encryptFile(
+        $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),
             MediaTypeEnum::VIDEO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
@@ -87,7 +87,7 @@ class EncryptionTest extends BaseTestCase
     public function testSideCarWithDocument()
     {
         //act
-        $this->encryption->encryptFile(
+        $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
             MediaTypeEnum::IMAGE,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
