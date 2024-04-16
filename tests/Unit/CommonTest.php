@@ -25,13 +25,19 @@ class CommonTest extends BaseTestCase
     public function testEncryptionDecryptionWithInvalidFilePath()
     {
         $this->expectException(FileNotFoundException::class);
-        $this->encryption->encryptFile('path/to/invalid_file.txt');
+        $this->encryption->encryptFile(
+            'path/to/invalid_file.txt',
+            MediaTypeEnum::DOCUMENT,
+        );
     }
 
     public function testEncryptionDecryptionWithEmptyFile()
     {
         $this->expectException(EmptyFileException::class);
-        $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'empty_file.txt');
+        $this->encryption->encryptFile(
+            self::TEST_FILES_FOLDER.'empty_file.txt',
+            MediaTypeEnum::DOCUMENT,
+        );
     }
 
     public function testEncryptionDecryptionWithCorruptedEncryptedFile()
@@ -56,7 +62,10 @@ class CommonTest extends BaseTestCase
 
     public function testEncryptionDecryptionWithStringData()
     {
-        $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'orig.txt');
+        $encryptedString = $this->encryption->encryptFile(
+            self::TEST_FILES_FOLDER.'orig.txt',
+            MediaTypeEnum::DOCUMENT,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
 
         $decryptedString = $this->decryption->decryptFile(
@@ -74,7 +83,10 @@ class CommonTest extends BaseTestCase
 
     public function testEncryptionDecryptionWithCustomImage()
     {
-        $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'myImage.png');
+        $encryptedString = $this->encryption->encryptFile(
+            self::TEST_FILES_FOLDER.'myImage.png',
+            MediaTypeEnum::IMAGE,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);
 
         $decryptedString = $this->decryption->decryptFile(

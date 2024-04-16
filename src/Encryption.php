@@ -22,12 +22,12 @@ class Encryption extends Crypt
      */
     public function encryptFile(
         string $filePath,
+        MediaTypeEnum $mediaType,
         /** здесь ключ опционален, если не предоставлен, то сгенерим сами */
         ?string $mediaKey = null,
     ): string {
         $this->stream = $this->getStreamFromFile($filePath);
-
-        $this->mediaType = $this->getMediaType($filePath);
+        $this->mediaType = $mediaType;
 
         return $this->encryptStreamData($mediaKey);
     }
@@ -48,7 +48,6 @@ class Encryption extends Crypt
      * @throws CorruptedMediaKeyException
      * @throws CryptException
      * @throws RandomException
-     * @throws FileNotFoundException
      */
     protected function encryptStreamData(
         ?string $mediaKey,

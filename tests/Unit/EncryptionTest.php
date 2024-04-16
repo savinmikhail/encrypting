@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use src\Encryption;
+use src\Enums\MediaTypeEnum;
 
 class EncryptionTest extends BaseTestCase
 {
@@ -17,6 +18,7 @@ class EncryptionTest extends BaseTestCase
     {
         $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
+            MediaTypeEnum::IMAGE,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
@@ -32,6 +34,7 @@ class EncryptionTest extends BaseTestCase
     {
         $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'AUDIO.mp3',
+            MediaTypeEnum::AUDIO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key')
         );
 
@@ -47,6 +50,7 @@ class EncryptionTest extends BaseTestCase
     {
         $decryptedString = $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
+            MediaTypeEnum::VIDEO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
 
@@ -64,6 +68,7 @@ class EncryptionTest extends BaseTestCase
         //act
         $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
+            MediaTypeEnum::VIDEO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
 
@@ -84,6 +89,7 @@ class EncryptionTest extends BaseTestCase
         //act
         $this->encryption->encryptFile(
             self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
+            MediaTypeEnum::IMAGE,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
