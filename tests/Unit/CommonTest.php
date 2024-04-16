@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use src\Decryption;
 use src\Encryption;
+use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
 use src\Exceptions\EmptyFileException;
@@ -36,7 +37,11 @@ class CommonTest extends BaseTestCase
     public function testEncryptionDecryptionWithCorruptedEncryptedFile()
     {
         $this->expectException(CryptException::class);
-        $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt', file_get_contents('mediaKey.txt'));
+        $this->decryption->decryptFile(
+            self::TEST_FILES_FOLDER.'corrupted_enc.txt',
+            file_get_contents('mediaKey.txt'),
+            MediaTypeEnum::DOCUMENT,
+        );
     }
 
     public function testEncryptionDecryptionWithIncorrectMediaKey()
@@ -44,7 +49,8 @@ class CommonTest extends BaseTestCase
         $this->expectException(CorruptedMediaKeyException::class);
         $this->decryption->decryptFile(
             self::TEST_FILES_FOLDER.'enc.txt',
-            file_get_contents(self::TEST_FILES_FOLDER.'incorrect_media_key.txt')
+            file_get_contents(self::TEST_FILES_FOLDER.'incorrect_media_key.txt'),
+            MediaTypeEnum::DOCUMENT,
         );
     }
 
@@ -53,7 +59,11 @@ class CommonTest extends BaseTestCase
         $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'orig.txt');
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
 
-        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'enc.txt', file_get_contents('mediaKey.txt'));
+        $decryptedString = $this->decryption->decryptFile(
+            self::TEST_FILES_FOLDER.'enc.txt',
+            file_get_contents('mediaKey.txt'),
+            MediaTypeEnum::DOCUMENT,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'dec.txt', $decryptedString);
 
         $this->assertEquals(
@@ -67,7 +77,11 @@ class CommonTest extends BaseTestCase
         $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'myImage.png');
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);
 
-        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png', file_get_contents('mediaKey.txt'));
+        $decryptedString = $this->decryption->decryptFile(
+            self::TEST_FILES_FOLDER.'myImageEnc.png',
+            file_get_contents('mediaKey.txt'),
+            MediaTypeEnum::IMAGE,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'myImageDec.png', $decryptedString);
 
         $originalHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImage.png');

@@ -3,6 +3,7 @@
 namespace src;
 
 use GuzzleHttp\Psr7\Utils;
+use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
 use src\Exceptions\FileNotFoundException;
@@ -137,9 +138,10 @@ class Decryption extends Crypt
         string $filePath,
         /** здесь либо пользователь предоставляет нужный ключ, либо берем потенциально последний сгенеренный */
         string $mediaKey,
+        MediaTypeEnum $mediaType
     ): string {
         $this->stream = $this->getStreamFromFile($filePath);
-        $this->mediaType = $this->getMediaType($filePath);
+        $this->mediaType = $mediaType;
 
         return $this->decryptStreamData($mediaKey);
     }
