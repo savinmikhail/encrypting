@@ -50,19 +50,6 @@ abstract class Crypt
         return new Stream($stream);
     }
 
-    protected function getMediaType(string $filePath): MediaTypeEnum
-    {
-        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
-
-        return match ($ext) {
-            'jpg', 'jpeg', 'png', 'gif' => MediaTypeEnum::IMAGE,
-            'txt', 'pdf', 'docx' => MediaTypeEnum::DOCUMENT,
-            'mp4' => MediaTypeEnum::VIDEO,
-            'mp3' => MediaTypeEnum::AUDIO,
-            default => MediaTypeEnum::DOCUMENT,
-        };
-    }
-
     protected function getCurrentIv(): string
     {
         return $this->iv;

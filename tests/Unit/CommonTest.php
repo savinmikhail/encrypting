@@ -44,7 +44,7 @@ class CommonTest extends BaseTestCase
     {
         $this->expectException(CryptException::class);
         $this->decryption->decryptFile(
-            self::TEST_FILES_FOLDER.'corrupted_enc.txt',
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt'),
             file_get_contents('mediaKey.txt'),
             MediaTypeEnum::DOCUMENT,
         );
@@ -54,7 +54,7 @@ class CommonTest extends BaseTestCase
     {
         $this->expectException(CorruptedMediaKeyException::class);
         $this->decryption->decryptFile(
-            self::TEST_FILES_FOLDER.'enc.txt',
+            $this->getStreamFromFile( self::TEST_FILES_FOLDER.'enc.txt'),
             file_get_contents(self::TEST_FILES_FOLDER.'incorrect_media_key.txt'),
             MediaTypeEnum::DOCUMENT,
         );
@@ -69,7 +69,7 @@ class CommonTest extends BaseTestCase
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
 
         $decryptedString = $this->decryption->decryptFile(
-            self::TEST_FILES_FOLDER.'enc.txt',
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'enc.txt'),
             file_get_contents('mediaKey.txt'),
             MediaTypeEnum::DOCUMENT,
         );
@@ -90,7 +90,7 @@ class CommonTest extends BaseTestCase
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);
 
         $decryptedString = $this->decryption->decryptFile(
-            self::TEST_FILES_FOLDER.'myImageEnc.png',
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'myImageEnc.png'),
             file_get_contents('mediaKey.txt'),
             MediaTypeEnum::IMAGE,
         );

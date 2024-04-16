@@ -17,7 +17,7 @@ class DecryptionTest extends BaseTestCase
     public function testDecryptionWithAudio()
     {
         $decryptedString = $this->decryption->decryptFile(
-            self::SAMPLES_FILES_FOLDER.'audioEnc.mp3',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'audioEnc.mp3'),
             file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key'),
             MediaTypeEnum::AUDIO,
         );
@@ -33,7 +33,7 @@ class DecryptionTest extends BaseTestCase
     public function testDecryptionWithVideo()
     {
         $decryptedString = $this->decryption->decryptFile(
-            self::SAMPLES_FILES_FOLDER.'videoEnc.mp4',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'videoEnc.mp4'),
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key'),
             MediaTypeEnum::VIDEO,
         );
@@ -49,7 +49,7 @@ class DecryptionTest extends BaseTestCase
     public function testDecryptionWithImageFromSamples()
     {
         $decryptedString = $this->decryption->decryptFile(
-            self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg'),
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key'),
             MediaTypeEnum::IMAGE,
         );

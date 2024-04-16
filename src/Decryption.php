@@ -3,6 +3,7 @@
 namespace src;
 
 use GuzzleHttp\Psr7\Utils;
+use Psr\Http\Message\StreamInterface;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
@@ -135,12 +136,12 @@ class Decryption extends Crypt
      * принимает зашифрованный методом encryptFile файл, возвращает дешифрованную последоватлеьность байтов
      */
     public function decryptFile(
-        string $filePath,
+        StreamInterface $stream,
         /** здесь либо пользователь предоставляет нужный ключ, либо берем потенциально последний сгенеренный */
         string $mediaKey,
         MediaTypeEnum $mediaType
     ): string {
-        $this->stream = $this->getStreamFromFile($filePath);
+        $this->stream = $stream;
         $this->mediaType = $mediaType;
 
         return $this->decryptStreamData($mediaKey);
