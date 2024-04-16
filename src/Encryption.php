@@ -13,9 +13,7 @@ use src\Exceptions\CryptException;
 class Encryption extends Crypt
 {
     protected const /*int*/ SIDECAR_OFFSET = 16;
-
-    protected string $macKey;
-
+    protected ?string $mediaKey;
     /**
      * @throws RandomException
      */
@@ -26,6 +24,22 @@ class Encryption extends Crypt
         file_put_contents(self::DEFAULT_MEDIA_KEY_FILE_NAME, $mediaKey);
 
         return $mediaKey;
+    }
+
+    /**
+     * @throws CorruptedMediaKeyException
+     * @throws RandomException
+     */
+    protected function checkMediaKey()
+    {
+        if ($this->mediaKey === null) {
+            //1.1  generate new mediaKey
+            $this->mediaKey = $this->generateMediaKey();
+        }
+        //1.2 or use existing mediaKey
+        if (strlen($this->mediaKey) !== self::MEDIA_KEY_LENGTH) {
+            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
+        }
     }
 
     /**
@@ -41,18 +55,11 @@ class Encryption extends Crypt
     ): string {
         $this->stream = $stream;
         $this->mediaType = $mediaType;
+        $this->mediaKey = $mediaKey;
 
-        if ($mediaKey === null) {
-            //1.1  generate new mediaKey
-            $mediaKey = $this->generateMediaKey();
-        }
-        //1.2 or use existing mediaKey
-        if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
-            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
-        }
-
+        $this->checkMediaKey();
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
+        $mediaKeyExpanded = $this->getExpandedMediaKey();
 
         //3. Split `mediaKeyExpanded`
         [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);

@@ -4,7 +4,9 @@ namespace src;
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use Psr\Http\Message\StreamInterface;
+use Random\RandomException;
 use src\Enums\MediaTypeEnum;
+use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
 
 class EncryptingStream extends Encryption implements StreamInterface
@@ -33,23 +35,21 @@ class EncryptingStream extends Encryption implements StreamInterface
         return ceil($length / self::BLOCK_SIZE);
     }
 
-    protected function getMediaKey(): void
-    {
-        if ($this->mediaKey === null) {
-            $this->mediaKey = $this->generateMediaKey();
-        }
-    }
-
+    /**
+     * @throws CorruptedMediaKeyException
+     * @throws CryptException
+     * @throws RandomException
+     */
     private function encryptBlock(int $length): string
     {
         if ($this->stream->eof()) {
             return '';
         }
         //1. Use provided media key or generate the new one
-        $this->getMediaKey();
+        $this->checkMediaKey();
 
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($this->mediaKey);
+        $mediaKeyExpanded = $this->getExpandedMediaKey();
 
         //3. Split `mediaKeyExpanded`
         [$this->iv , $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);

@@ -25,12 +25,16 @@ class DecryptingStream extends Decryption implements StreamInterface
         return $this->decryptBlock($length);
     }
 
+    /**
+     * @throws CryptException
+     */
     private function decryptBlock(int $length): string
     {
         //1. Obtain `mediaKey`.
-        $mediaKey = file_get_contents('mediaKey.txt');
+        $this->mediaKey = file_get_contents('mediaKey.txt');
+
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
+        $mediaKeyExpanded = $this->getExpandedMediaKey();
 
         //3. Split `mediaKeyExpanded`
         [$this->iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);

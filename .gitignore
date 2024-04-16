@@ -19,3 +19,5 @@ yarn-error.log
 /.vscode
 mediaKey.txt
 tests/Unit/testFiles/video.sidecar
+tests/Unit/testFiles/myImageEnc.png
+tests/Unit/testFiles/enc.txt

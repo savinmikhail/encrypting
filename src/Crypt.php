@@ -25,6 +25,8 @@ abstract class Crypt
 
     protected StreamInterface $stream;
 
+    protected string $macKey;
+
     protected string $iv;
 
     protected function getCurrentIv(): string
@@ -47,12 +49,12 @@ abstract class Crypt
         return [$iv, $cipherKey, $macKey];
     }
 
-    protected function getExpandedMediaKey(string $mediaKey): string
+    protected function getExpandedMediaKey(): string
     {
         // Expand mediaKey to 112 bytes using HKDF with SHA-256 and type-specific application info
         return hash_hkdf(
             self::HASH_ALGORITHM,
-            $mediaKey,
+            $this->mediaKey,
             self::MEDIA_KEY_EXPANDED_LENGTH,
             $this->mediaType->value,
         );

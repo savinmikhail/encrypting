@@ -10,13 +10,23 @@ use src\Exceptions\CryptException;
 
 class Decryption extends Crypt
 {
-    protected string $macKey;
+    protected string $mediaKey;
 
     protected function unpad($data): string
     {
         $padding = ord($data[strlen($data) - 1]);
 
         return substr($data, 0, -$padding);
+    }
+
+    /**
+     * @throws CorruptedMediaKeyException
+     */
+    protected function checkMediaKey(): void
+    {
+        if (strlen($this->mediaKey) !== self::MEDIA_KEY_LENGTH) {
+            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
+        }
     }
 
     /**
@@ -30,14 +40,13 @@ class Decryption extends Crypt
     ): string {
         $this->stream = $stream;
         $this->mediaType = $mediaType;
+        $this->mediaKey = $mediaKey;
 
         //1. Obtain `mediaKey`.
-        if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
-            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
-        }
+        $this->checkMediaKey();
 
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
+        $mediaKeyExpanded = $this->getExpandedMediaKey();
 
         //3. Split `mediaKeyExpanded`
         [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
