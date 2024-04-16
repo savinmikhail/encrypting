@@ -26,7 +26,7 @@ class CommonTest extends BaseTestCase
     {
         $this->expectException(FileNotFoundException::class);
         $this->encryption->encryptFile(
-            'path/to/invalid_file.txt',
+            $this->getStreamFromFile('path/to/invalid_file.txt'),
             MediaTypeEnum::DOCUMENT,
         );
     }
@@ -35,7 +35,7 @@ class CommonTest extends BaseTestCase
     {
         $this->expectException(EmptyFileException::class);
         $this->encryption->encryptFile(
-            self::TEST_FILES_FOLDER.'empty_file.txt',
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'empty_file.txt'),
             MediaTypeEnum::DOCUMENT,
         );
     }
@@ -63,7 +63,7 @@ class CommonTest extends BaseTestCase
     public function testEncryptionDecryptionWithStringData()
     {
         $encryptedString = $this->encryption->encryptFile(
-            self::TEST_FILES_FOLDER.'orig.txt',
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'orig.txt'),
             MediaTypeEnum::DOCUMENT,
         );
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
@@ -84,7 +84,7 @@ class CommonTest extends BaseTestCase
     public function testEncryptionDecryptionWithCustomImage()
     {
         $encryptedString = $this->encryption->encryptFile(
-            self::TEST_FILES_FOLDER.'myImage.png',
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'myImage.png'),
             MediaTypeEnum::IMAGE,
         );
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);

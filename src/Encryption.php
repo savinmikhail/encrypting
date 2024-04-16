@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace src;
 
 use GuzzleHttp\Psr7\Stream;
+use Psr\Http\Message\StreamInterface;
 use Random\RandomException;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
@@ -21,12 +22,12 @@ class Encryption extends Crypt
      * принимает файл, возвращает строоку зашифрованных байтов
      */
     public function encryptFile(
-        string $filePath,
+        StreamInterface $stream,
         MediaTypeEnum $mediaType,
         /** здесь ключ опционален, если не предоставлен, то сгенерим сами */
         ?string $mediaKey = null,
     ): string {
-        $this->stream = $this->getStreamFromFile($filePath);
+        $this->stream = $stream;
         $this->mediaType = $mediaType;
 
         return $this->encryptStreamData($mediaKey);

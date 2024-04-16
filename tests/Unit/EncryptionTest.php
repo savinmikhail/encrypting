@@ -17,7 +17,7 @@ class EncryptionTest extends BaseTestCase
     public function testEncryptionWithImage()
     {
         $decryptedString = $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
             MediaTypeEnum::IMAGE,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
@@ -33,7 +33,7 @@ class EncryptionTest extends BaseTestCase
     public function testEncryptionWithAudio()
     {
         $decryptedString = $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'AUDIO.mp3',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'AUDIO.mp3'),
             MediaTypeEnum::AUDIO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key')
         );
@@ -49,7 +49,7 @@ class EncryptionTest extends BaseTestCase
     public function testEncryptionWithVideo()
     {
         $decryptedString = $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),
             MediaTypeEnum::VIDEO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
@@ -67,7 +67,7 @@ class EncryptionTest extends BaseTestCase
         $this->markTestSkipped('anyway not working');
         //act
         $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),
             MediaTypeEnum::VIDEO,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
@@ -88,7 +88,7 @@ class EncryptionTest extends BaseTestCase
     {
         //act
         $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
             MediaTypeEnum::IMAGE,
             file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
