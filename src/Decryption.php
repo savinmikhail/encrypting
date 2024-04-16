@@ -23,8 +23,14 @@ class Decryption extends Crypt
      * @throws CorruptedMediaKeyException
      * @throws CryptException
      */
-    protected function decryptStreamData(string $mediaKey): string
-    {
+    public function decryptStream(
+        StreamInterface $stream,
+        string $mediaKey,
+        MediaTypeEnum $mediaType,
+    ): string {
+        $this->stream = $stream;
+        $this->mediaType = $mediaType;
+
         //1. Obtain `mediaKey`.
         if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
             throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
@@ -72,6 +78,7 @@ class Decryption extends Crypt
         // Read the MAC
         $mac = $this->stream->read(self::MAC_LENGTH);
         $this->stream->rewind();
+
         return $mac;
     }
 
@@ -128,20 +135,5 @@ class Decryption extends Crypt
         }
 
         return $this->unpad($decryptedData);
-    }
-
-    /**
-     * принимает зашифрованный методом encryptFile файл, возвращает дешифрованную последоватлеьность байтов
-     */
-    public function decryptFile(
-        StreamInterface $stream,
-        /** здесь либо пользователь предоставляет нужный ключ, либо берем потенциально последний сгенеренный */
-        string $mediaKey,
-        MediaTypeEnum $mediaType
-    ): string {
-        $this->stream = $stream;
-        $this->mediaType = $mediaType;
-
-        return $this->decryptStreamData($mediaKey);
     }
 }

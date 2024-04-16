@@ -111,6 +111,7 @@ class Encryption extends Crypt
         if (! $isLastChunk) {
             $options |= OPENSSL_ZERO_PADDING;
         }
+
         return $options;
     }
 

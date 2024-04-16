@@ -85,5 +85,4 @@ class EncryptingStream extends Encryption implements StreamInterface
         //6. Append `mac` to the `enc`
         return $encryptedData.$mac;
     }
-
 }
