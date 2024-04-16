@@ -4,8 +4,6 @@ namespace Tests\Unit;
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
 use Tests\TestCase;
 
 class BaseTestCase extends TestCase
@@ -17,7 +15,7 @@ class BaseTestCase extends TestCase
     protected function getMediaKeyFromFile(string $keyFileName): string
     {
         if (! file_exists($keyFileName)) {
-            throw new FileNotFoundException('mediaKey not found');
+            throw new \Exception('mediaKey not found');
         }
 
         // Obtain mediaKey (your implementation to obtain the media key)
@@ -27,11 +25,11 @@ class BaseTestCase extends TestCase
     protected function getStreamFromFile(string $filePath): StreamInterface
     {
         if (! file_exists($filePath)) {
-            throw new FileNotFoundException("File $filePath does not exist");
+            throw new \Exception("File $filePath does not exist");
         }
         // Check if the file is empty
         if (filesize($filePath) === 0) {
-            throw new EmptyFileException("File $filePath is empty");
+            throw new \Exception("File $filePath is empty");
         }
         $stream = fopen($filePath, 'r');
         fseek($stream, 0);

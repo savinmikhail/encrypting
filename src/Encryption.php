@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace src;
 
-use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
 use Random\RandomException;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
-use src\Exceptions\FileNotFoundException;
 
 class Encryption extends Crypt
 {

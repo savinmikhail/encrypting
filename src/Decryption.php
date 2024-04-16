@@ -7,7 +7,6 @@ use Psr\Http\Message\StreamInterface;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
-use src\Exceptions\FileNotFoundException;
 
 class Decryption extends Crypt
 {
@@ -23,7 +22,6 @@ class Decryption extends Crypt
     /**
      * @throws CorruptedMediaKeyException
      * @throws CryptException
-     * @throws FileNotFoundException
      */
     protected function decryptStreamData(string $mediaKey): string
     {

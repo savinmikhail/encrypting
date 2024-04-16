@@ -7,8 +7,6 @@ use src\Encryption;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CorruptedMediaKeyException;
 use src\Exceptions\CryptException;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
 
 class CommonTest extends BaseTestCase
 {
@@ -20,24 +18,6 @@ class CommonTest extends BaseTestCase
     {
         $this->decryption = new Decryption();
         $this->encryption = new Encryption();
-    }
-
-    public function testEncryptionDecryptionWithInvalidFilePath()
-    {
-        $this->expectException(FileNotFoundException::class);
-        $this->encryption->encryptFile(
-            $this->getStreamFromFile('path/to/invalid_file.txt'),
-            MediaTypeEnum::DOCUMENT,
-        );
-    }
-
-    public function testEncryptionDecryptionWithEmptyFile()
-    {
-        $this->expectException(EmptyFileException::class);
-        $this->encryption->encryptFile(
-            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'empty_file.txt'),
-            MediaTypeEnum::DOCUMENT,
-        );
     }
 
     public function testEncryptionDecryptionWithCorruptedEncryptedFile()

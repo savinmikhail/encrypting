@@ -2,12 +2,8 @@
 
 namespace src;
 
-use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
 use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\EmptyFileException;
-use src\Exceptions\FileNotFoundException;
 
 abstract class Crypt
 {
@@ -30,25 +26,6 @@ abstract class Crypt
     protected StreamInterface $stream;
 
     protected string $iv;
-
-    /**
-     * @throws EmptyFileException
-     * @throws FileNotFoundException
-     */
-    protected function getStreamFromFile(string $filePath): StreamInterface
-    {
-        if (! file_exists($filePath)) {
-            throw new FileNotFoundException("File $filePath does not exist");
-        }
-        // Check if the file is empty
-        if (filesize($filePath) === 0) {
-            throw new EmptyFileException("File $filePath is empty");
-        }
-        $stream = fopen($filePath, 'r');
-        fseek($stream, 0);
-
-        return new Stream($stream);
-    }
 
     protected function getCurrentIv(): string
     {
