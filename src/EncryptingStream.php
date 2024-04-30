@@ -34,9 +34,7 @@ class EncryptingStream extends Encryption implements StreamInterface
     }
 
     /**
-     * @throws CorruptedMediaKeyException
      * @throws CryptException
-     * @throws RandomException
      */
     private function encryptBlock(int $length): string
     {

@@ -12,7 +12,7 @@ class EncryptionStreamTest extends BaseTestCase
     public function testEncryptionCorrectness()
     {
         // Arrange
-        $plaintext = 'Hello, world!gllkjklnk;njknk;nk;nk;nk;jknknkjnjnkjn';
+        $plaintext = str_repeat('Hello, world!',10);
         $stream = Utils::streamFor($plaintext);
         $encryptingStream = new EncryptingStream($stream, MediaTypeEnum::DOCUMENT);
 
@@ -36,34 +36,40 @@ class EncryptionStreamTest extends BaseTestCase
 
     public function testEncryptForImage()
     {
-        $stream =  $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4');
+        $stream =  $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg');
         $encryptingStream = new EncryptingStream(
             $stream,
-            MediaTypeEnum::VIDEO,
-            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
+            MediaTypeEnum::IMAGE,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
-        file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $encryptingStream->read($encryptingStream->getSize()));
+        file_put_contents(
+            self::TEST_FILES_FOLDER.'imageEnc.jpeg',
+            $encryptingStream->read($encryptingStream->getSize())
+        );
 
-        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'videoEnc.mp4');
-        $encryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'videoEnc.mp4');
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg');
+        $encryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'imageEnc.jpeg');
 
         $this->assertEquals($originalHash, $encryptedHash);
     }
 
     public function testDecryptForImage()
     {
-        $stream =  $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4');
+        $stream =  $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg');
         $decryptingStream = new DecryptingStream(
             $stream,
-            MediaTypeEnum::VIDEO,
-            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
+            MediaTypeEnum::IMAGE,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
-        file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $decryptingStream->read($decryptingStream->getSize()));
+        file_put_contents(
+            self::TEST_FILES_FOLDER.'imageDec.jpeg',
+            $decryptingStream->read($decryptingStream->getSize())
+        );
 
-        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'videoEnc.mp4');
-        $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'videoEnc.mp4');
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg');
+        $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'IMAGE.jpeg');
 
         $this->assertEquals($originalHash, $decryptedHash);
     }

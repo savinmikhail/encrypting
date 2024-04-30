@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mikhail\Encryptor;
 
 use GuzzleHttp\Psr7\Utils;

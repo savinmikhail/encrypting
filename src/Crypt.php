@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mikhail\Encryptor;
 
 use Psr\Http\Message\StreamInterface;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;
-use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
-use Mikhail\Encryptor\Exceptions\EmptyFileException;
-use Mikhail\Encryptor\Exceptions\FileNotFoundException;
-
 
 abstract class Crypt
 {

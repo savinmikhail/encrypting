@@ -7,7 +7,6 @@ namespace Mikhail\Encryptor;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
 use Mikhail\Encryptor\Exceptions\CryptException;
-use Mikhail\Encryptor\Exceptions\FileNotFoundException;
 use Psr\Http\Message\StreamInterface;
 use Random\RandomException;
 
