@@ -3,6 +3,7 @@
 namespace src;
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\StreamInterface;
 use src\Enums\MediaTypeEnum;
 use src\Exceptions\CryptException;
@@ -11,8 +12,11 @@ class DecryptingStream extends Decryption implements StreamInterface
 {
     use StreamDecoratorTrait;
 
-    public function __construct(protected StreamInterface $stream, protected MediaTypeEnum $mediaType)
-    {
+    public function __construct(
+        protected StreamInterface $stream,
+        protected MediaTypeEnum $mediaType,
+        protected string $mediaKey,
+    ) {
     }
 
     public function isWritable(): false
@@ -28,23 +32,21 @@ class DecryptingStream extends Decryption implements StreamInterface
     /**
      * @throws CryptException
      */
-    private function decryptBlock(int $length): string
+    protected function decryptBlock(int $length): string
     {
         //1. Obtain `mediaKey`.
-        $this->mediaKey = file_get_contents('mediaKey.txt');
-
         //2. Expand it
         $mediaKeyExpanded = $this->getExpandedMediaKey();
 
         //3. Split `mediaKeyExpanded`
-        [$this->iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        [$this->iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
 
         //4. Obtain file and mac
-        //        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
-        //        $this->stream = $this->stringToStream($file);
+//                [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
+//                $this->stream = Utils::streamFor($file);
 
         //5. Validate media data
-        //        $this->validateMediaData($file, $mac, $iv, $macKey);
+//                $this->validateMediaData($file, $mac);
 
         //6. Decrypt `file`
         $decryptedData = '';

@@ -46,7 +46,7 @@ class EncryptionTest extends BaseTestCase
         $this->assertEquals($originalHash, $encryptedHash);
     }
 
-    public function testEncryptionWithVideo()
+    public function testEncryptionWithVideo(): void
     {
         $decryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),

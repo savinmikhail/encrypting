@@ -46,10 +46,8 @@ class Decryption extends Crypt
         $this->checkMediaKey();
 
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey();
-
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($this->getExpandedMediaKey());
         $this->iv = $iv;
 
         //4. Obtain file and mac
@@ -57,7 +55,7 @@ class Decryption extends Crypt
         $this->stream = Utils::streamFor($file);
 
         //5. Validate media data
-        $this->validateMediaData($file, $mac, $iv, $this->macKey);
+        $this->validateMediaData($file, $mac);
 
         //6. Decrypt `file`
         return $this->decrypt($cipherKey);
@@ -94,14 +92,10 @@ class Decryption extends Crypt
     /**
      * @throws CryptException
      */
-    protected function validateMediaData(
-        string $encryptedFile,
-        string $mac,
-        string $iv,
-        string $macKey,
-    ): void {
+    protected function validateMediaData(string $encryptedFile,string $mac): void
+    {
         // Validate media data with HMAC by signing iv + encryptedFile with macKey using SHA-256
-        $computedMac = $this->getMac($iv, $encryptedFile, $macKey);
+        $computedMac = $this->getMac($this->iv, $encryptedFile, $this->macKey);
 
         // Compare the computed MAC with the received MAC
         if (! hash_equals($mac, $computedMac)) {
@@ -117,32 +111,38 @@ class Decryption extends Crypt
         $decryptedData = '';
 
         while (! $this->stream->eof()) {
-
             // Read a chunk of data from the stream
             $encryptedChunk = $this->stream->read(self::BLOCK_SIZE);
 
-            //the last chunk is always empty string, so it is impossible to decrypt
-            $isLastChunk = $this->stream->eof();
-
-            if ($isLastChunk) {
-                break;
-            }
-            $decryptedChunk = openssl_decrypt(
-                data: $encryptedChunk,
-                cipher_algo: self::CIPHER_ALGORITHM,
-                passphrase: $cipherKey,
-                options: OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
-                iv: $this->getCurrentIv(),
-            );
-
-            if ($decryptedChunk === false) {
-                throw new CryptException('Decrypted data failed: '.openssl_error_string());
-            }
+            $decryptedChunk = $this->decryptChunk($cipherKey, $encryptedChunk);
 
             $decryptedData .= $decryptedChunk;
             $this->updateIv($encryptedChunk);
         }
 
         return $this->unpad($decryptedData);
+    }
+
+    /**
+     * @throws CryptException
+     */
+    protected function decryptChunk(string $cipherKey, string $encryptedChunk): string
+    {
+        //the last chunk is always empty string, so it is impossible to decrypt
+        if ($this->stream->eof()) {
+            return '';
+        }
+        $decryptedChunk = openssl_decrypt(
+            data: $encryptedChunk,
+            cipher_algo: self::CIPHER_ALGORITHM,
+            passphrase: $cipherKey,
+            options: OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
+            iv: $this->getCurrentIv(),
+        );
+
+        if ($decryptedChunk === false) {
+            throw new CryptException('Decrypted data failed: '.openssl_error_string());
+        }
+        return $decryptedChunk;
     }
 }

@@ -30,7 +30,7 @@ class Encryption extends Crypt
      * @throws CorruptedMediaKeyException
      * @throws RandomException
      */
-    protected function checkMediaKey()
+    protected function checkMediaKey(): void
     {
         if ($this->mediaKey === null) {
             //1.1  generate new mediaKey
@@ -59,10 +59,8 @@ class Encryption extends Crypt
 
         $this->checkMediaKey();
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey();
-
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($this->getExpandedMediaKey());
         $this->iv = $iv;
 
         //4. Encrypt the file
@@ -110,12 +108,9 @@ class Encryption extends Crypt
 
     protected function getOptions(): int
     {
-        // Check if this is the last chunk
-        $isLastChunk = $this->stream->eof();
-
         $options = OPENSSL_RAW_DATA;
         // Apply padding only if it's not the last chunk
-        if (! $isLastChunk) {
+        if (! $this->stream->eof()) {
             $options |= OPENSSL_ZERO_PADDING;
         }
 
