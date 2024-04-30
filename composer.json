@@ -12,7 +12,7 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "Mikhail\\Encyptor\\": "src/"
+            "Mikhail\\Encryptor\\": "src/"
         }
     },
     "autoload-dev": {

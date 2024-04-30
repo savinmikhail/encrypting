@@ -1,6 +1,6 @@
 <?php
 
-namespace Mikhail\Tests\Encyptor;
+namespace Mikhail\Tests\Encryptor;
 
 use Mikhail\Encryptor\Encryption;
 use PHPUnit\Framework\TestCase;

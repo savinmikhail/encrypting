@@ -1,6 +1,6 @@
 <?php
 
-namespace Mikhail\Tests\Encyptor;
+namespace Mikhail\Tests\Encryptor;
 
 use GuzzleHttp\Psr7\Utils;
 use Mikhail\Encryptor\DecryptingStream;
