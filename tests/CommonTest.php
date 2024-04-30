@@ -20,7 +20,7 @@ class CommonTest extends BaseTestCase
         $this->encryption = new Encryption();
     }
 
-    public function testEncryptionDecryptionWithCorruptedEncryptedFile()
+    public function testEncryptionDecryptionWithCorruptedEncryptedFile(): void
     {
         $this->expectException(CryptException::class);
         $this->decryption->decryptStream(
@@ -30,7 +30,7 @@ class CommonTest extends BaseTestCase
         );
     }
 
-    public function testEncryptionDecryptionWithIncorrectMediaKey()
+    public function testEncryptionDecryptionWithIncorrectMediaKey(): void
     {
         $this->expectException(CorruptedMediaKeyException::class);
         $this->decryption->decryptStream(
@@ -40,7 +40,7 @@ class CommonTest extends BaseTestCase
         );
     }
 
-    public function testEncryptionDecryptionWithStringData()
+    public function testEncryptionDecryptionWithStringData(): void
     {
         $encryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::TEST_FILES_FOLDER.'orig.txt'),
@@ -61,7 +61,7 @@ class CommonTest extends BaseTestCase
         );
     }
 
-    public function testEncryptionDecryptionWithCustomImage()
+    public function testEncryptionDecryptionWithCustomImage(): void
     {
         $encryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::TEST_FILES_FOLDER.'myImage.png'),

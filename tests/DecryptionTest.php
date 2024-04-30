@@ -14,7 +14,7 @@ class DecryptionTest extends BaseTestCase
         $this->decryption = new Decryption();
     }
 
-    public function testDecryptionWithAudio()
+    public function testDecryptionWithAudio(): void
     {
         $decryptedString = $this->decryption->decryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'audioEnc.mp3'),
@@ -30,7 +30,7 @@ class DecryptionTest extends BaseTestCase
         $this->assertEquals($originalHash, $decryptedHash);
     }
 
-    public function testDecryptionWithVideo()
+    public function testDecryptionWithVideo(): void
     {
         $decryptedString = $this->decryption->decryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'videoEnc.mp4'),
@@ -46,7 +46,7 @@ class DecryptionTest extends BaseTestCase
         $this->assertEquals($originalHash, $decryptedHash);
     }
 
-    public function testDecryptionWithImageFromSamples()
+    public function testDecryptionWithImageFromSamples(): void
     {
         $decryptedString = $this->decryption->decryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg'),

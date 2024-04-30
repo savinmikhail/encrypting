@@ -117,6 +117,7 @@ class Encryption extends Crypt
         return $options;
     }
 
+    //todo: надо не делать дополнительных чтений стрима
     public function getSideCar(): ?string
     {
         $sidecar = null;

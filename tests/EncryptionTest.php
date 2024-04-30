@@ -14,7 +14,7 @@ class EncryptionTest extends BaseTestCase
         $this->encryption = new Encryption();
     }
 
-    public function testEncryptionWithImage()
+    public function testEncryptionWithImage(): void
     {
         $decryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
@@ -30,7 +30,7 @@ class EncryptionTest extends BaseTestCase
         $this->assertEquals($originalHash, $encryptedHash);
     }
 
-    public function testEncryptionWithAudio()
+    public function testEncryptionWithAudio(): void
     {
         $decryptedString = $this->encryption->encryptStream(
             $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'AUDIO.mp3'),
@@ -62,7 +62,7 @@ class EncryptionTest extends BaseTestCase
         $this->assertEquals($originalHash, $encryptedHash);
     }
 
-    public function testSideCarWithVideo()
+    public function testSideCarWithVideo(): void
     {
         $this->markTestSkipped('anyway not working');
         //act
@@ -84,7 +84,7 @@ class EncryptionTest extends BaseTestCase
         );
     }
 
-    public function testSideCarWithDocument()
+    public function testSideCarWithDocument(): void
     {
         //act
         $this->encryption->encryptStream(
