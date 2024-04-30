@@ -4,17 +4,14 @@ namespace Mikhail\Tests\Encryptor;
 
 use Mikhail\Encryptor\Decryption;
 use Mikhail\Encryptor\Encryption;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
 use Mikhail\Encryptor\Exceptions\CryptException;
-use Mikhail\Encryptor\Exceptions\EmptyFileException;
-use Mikhail\Encryptor\Exceptions\FileNotFoundException;
-use PHPUnit\Framework\TestCase;
 
-class CommonTest  extends TestCase
+class CommonTest extends BaseTestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/testFiles/';
-
     private Decryption $decryption;
+
     private Encryption $encryption;
 
     public function setUp(): void
@@ -23,48 +20,39 @@ class CommonTest  extends TestCase
         $this->encryption = new Encryption();
     }
 
-    public function testEncryptionDecryptionWithInvalidFilePath()
-    {
-        $this->expectException(FileNotFoundException::class);
-        $this->encryption->encryptFile('path/to/invalid_file.txt');
-    }
-
-    public function testEncryptionDecryptionWithEmptyFile()
-    {
-        $this->expectException(EmptyFileException::class);
-        $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'empty_file.txt');
-    }
-
-    public function testEncryptionDecryptionWithInvalidKeyFile()
-    {
-        $this->expectException(FileNotFoundException::class);
-        $this->encryption->encryptFile(
-            self::TEST_FILES_FOLDER.'orig.txt',
-            'path/to/invalid_key.txt'
-        );
-    }
-
     public function testEncryptionDecryptionWithCorruptedEncryptedFile()
     {
         $this->expectException(CryptException::class);
-        $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt');
+        $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'corrupted_enc.txt'),
+            file_get_contents('mediaKey.txt'),
+            MediaTypeEnum::DOCUMENT,
+        );
     }
 
     public function testEncryptionDecryptionWithIncorrectMediaKey()
     {
         $this->expectException(CorruptedMediaKeyException::class);
-        $this->decryption->decryptFile(
-            self::TEST_FILES_FOLDER.'enc.txt',
-            self::TEST_FILES_FOLDER.'incorrect_media_key.txt'
+        $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'enc.txt'),
+            file_get_contents(self::TEST_FILES_FOLDER.'incorrect_media_key.txt'),
+            MediaTypeEnum::DOCUMENT,
         );
     }
 
     public function testEncryptionDecryptionWithStringData()
     {
-        $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'orig.txt');
+        $encryptedString = $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'orig.txt'),
+            MediaTypeEnum::DOCUMENT,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'enc.txt', $encryptedString);
 
-        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'enc.txt');
+        $decryptedString = $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'enc.txt'),
+            file_get_contents('mediaKey.txt'),
+            MediaTypeEnum::DOCUMENT,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'dec.txt', $decryptedString);
 
         $this->assertEquals(
@@ -75,12 +63,18 @@ class CommonTest  extends TestCase
 
     public function testEncryptionDecryptionWithCustomImage()
     {
-        $encryptedString = $this->encryption->encryptFile(self::TEST_FILES_FOLDER.'myImage.png');
+        $encryptedString = $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'myImage.png'),
+            MediaTypeEnum::IMAGE,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'myImageEnc.png', $encryptedString);
 
-        $decryptedString = $this->decryption->decryptFile(self::TEST_FILES_FOLDER.'myImageEnc.png');
+        $decryptedString = $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::TEST_FILES_FOLDER.'myImageEnc.png'),
+            file_get_contents('mediaKey.txt'),
+            MediaTypeEnum::IMAGE,
+        );
         file_put_contents(self::TEST_FILES_FOLDER.'myImageDec.png', $decryptedString);
-
 
         $originalHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImage.png');
         $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'myImageDec.png');

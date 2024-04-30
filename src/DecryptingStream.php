@@ -3,6 +3,7 @@
 namespace Mikhail\Encryptor;
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\StreamInterface;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Mikhail\Encryptor\Exceptions\CryptException;
@@ -11,12 +12,11 @@ class DecryptingStream extends Decryption implements StreamInterface
 {
     use StreamDecoratorTrait;
 
-    protected const BLOCK_SIZE = 16; // AES block size is 16 bytes (128 bits)
-
-    protected const /*string*/ CIPHER_ALGORITHM = 'aes-256-cbc';
-
-    public function __construct(protected StreamInterface $stream)
-    {
+    public function __construct(
+        protected StreamInterface $stream,
+        protected MediaTypeEnum $mediaType,
+        protected string $mediaKey,
+    ) {
     }
 
     public function isWritable(): false
@@ -29,32 +29,30 @@ class DecryptingStream extends Decryption implements StreamInterface
         return $this->decryptBlock($length);
     }
 
-    private function decryptBlock(int $length): string
+    /**
+     * @throws CryptException
+     */
+    protected function decryptBlock(int $length): string
     {
-        $this->mediaType =  MediaTypeEnum::DOCUMENT;
-
-        $keyFileName = 'mediaKey.txt';
         //1. Obtain `mediaKey`.
-        $mediaKey = $this->getMediaKeyFromFile($keyFileName);
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
+        $mediaKeyExpanded = $this->getExpandedMediaKey();
 
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
-        $this->iv = $iv;
+        [$this->iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($mediaKeyExpanded);
 
         //4. Obtain file and mac
-//        [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
-//        $this->stream = $this->stringToStream($file);
+//                [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
+//                $this->stream = Utils::streamFor($file);
 
         //5. Validate media data
-//        $this->validateMediaData($file, $mac, $iv, $macKey);
+//                $this->validateMediaData($file, $mac);
 
         //6. Decrypt `file`
         $decryptedData = '';
-        $count = ceil($length/self::BLOCK_SIZE);
+        $count = ceil($length / self::BLOCK_SIZE);
 
-        while ($count > 0 || !$this->stream->eof()) {
+        while ($count > 0 || ! $this->stream->eof()) {
 
             // Read a chunk of data from the stream
             $encryptedChunk = $this->stream->read(self::BLOCK_SIZE);
@@ -79,11 +77,11 @@ class DecryptingStream extends Decryption implements StreamInterface
             $this->updateIv($encryptedChunk);
         }
 
-        if($this->stream->eof()){
+        if ($this->stream->eof()) {
             return $this->unpad($decryptedData);
         }
+
         return $decryptedData;
 
     }
-
 }

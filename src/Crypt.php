@@ -2,12 +2,12 @@
 
 namespace Mikhail\Encryptor;
 
-use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
 use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
 use Mikhail\Encryptor\Exceptions\EmptyFileException;
 use Mikhail\Encryptor\Exceptions\FileNotFoundException;
+
 
 abstract class Crypt
 {
@@ -29,59 +29,9 @@ abstract class Crypt
 
     protected StreamInterface $stream;
 
+    protected string $macKey;
+
     protected string $iv;
-
-    /**
-     * @throws EmptyFileException
-     * @throws FileNotFoundException
-     */
-    protected function getStreamFromFile(string $filePath): StreamInterface
-    {
-        if (! file_exists($filePath)) {
-            throw new FileNotFoundException("File $filePath does not exist");
-        }
-        // Check if the file is empty
-        if (filesize($filePath) === 0) {
-            throw new EmptyFileException("File $filePath is empty");
-        }
-        $stream = fopen($filePath, 'r');
-        fseek($stream, 0);
-
-        return new Stream($stream);
-    }
-
-    protected function getMediaType(string $filePath): MediaTypeEnum
-    {
-        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
-
-        return match ($ext) {
-            'jpg', 'jpeg', 'png', 'gif' => MediaTypeEnum::IMAGE,
-            'txt', 'pdf', 'docx' => MediaTypeEnum::DOCUMENT,
-            'mp4' => MediaTypeEnum::VIDEO,
-            'mp3' => MediaTypeEnum::AUDIO,
-            default => MediaTypeEnum::DOCUMENT,
-        };
-    }
-
-    /**
-     * @throws CorruptedMediaKeyException
-     * @throws FileNotFoundException
-     */
-    protected function getMediaKeyFromFile(string $keyFileName): string
-    {
-        if (! file_exists($keyFileName)) {
-            throw new FileNotFoundException('mediaKey not found');
-        }
-
-        // Obtain mediaKey (your implementation to obtain the media key)
-        $mediaKey = file_get_contents($keyFileName);
-
-        if (strlen($mediaKey) !== self::MEDIA_KEY_LENGTH) {
-            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
-        }
-
-        return $mediaKey;
-    }
 
     protected function getCurrentIv(): string
     {
@@ -103,12 +53,12 @@ abstract class Crypt
         return [$iv, $cipherKey, $macKey];
     }
 
-    protected function getExpandedMediaKey(string $mediaKey): string
+    protected function getExpandedMediaKey(): string
     {
         // Expand mediaKey to 112 bytes using HKDF with SHA-256 and type-specific application info
         return hash_hkdf(
             self::HASH_ALGORITHM,
-            $mediaKey,
+            $this->mediaKey,
             self::MEDIA_KEY_EXPANDED_LENGTH,
             $this->mediaType->value,
         );

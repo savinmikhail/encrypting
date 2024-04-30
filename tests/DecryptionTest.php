@@ -3,14 +3,10 @@
 namespace Mikhail\Tests\Encryptor;
 
 use Mikhail\Encryptor\Decryption;
-use PHPUnit\Framework\TestCase;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 
-class DecryptionTest extends TestCase
+class DecryptionTest extends BaseTestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/testFiles/';
-
-    private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
-
     private Decryption $decryption;
 
     public function setUp(): void
@@ -20,9 +16,10 @@ class DecryptionTest extends TestCase
 
     public function testDecryptionWithAudio()
     {
-        $decryptedString = $this->decryption->decryptFile(
-            self::SAMPLES_FILES_FOLDER.'audioEnc.mp3',
-            self::SAMPLES_FILES_FOLDER.'AUDIO.key'
+        $decryptedString = $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'audioEnc.mp3'),
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key'),
+            MediaTypeEnum::AUDIO,
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'AUDIO.mp3', $decryptedString);
@@ -35,9 +32,10 @@ class DecryptionTest extends TestCase
 
     public function testDecryptionWithVideo()
     {
-        $decryptedString = $this->decryption->decryptFile(
-            self::SAMPLES_FILES_FOLDER.'videoEnc.mp4',
-            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+        $decryptedString = $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'videoEnc.mp4'),
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key'),
+            MediaTypeEnum::VIDEO,
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'VIDEO.mp4', $decryptedString);
@@ -50,9 +48,10 @@ class DecryptionTest extends TestCase
 
     public function testDecryptionWithImageFromSamples()
     {
-        $decryptedString = $this->decryption->decryptFile(
-            self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg',
-            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+        $decryptedString = $this->decryption->decryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'imageEnc.jpeg'),
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key'),
+            MediaTypeEnum::IMAGE,
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg', $decryptedString);

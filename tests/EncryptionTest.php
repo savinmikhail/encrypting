@@ -3,29 +3,23 @@
 namespace Mikhail\Tests\Encryptor;
 
 use Mikhail\Encryptor\Encryption;
-use PHPUnit\Framework\TestCase;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 
-class EncryptionTest extends TestCase
+class EncryptionTest extends BaseTestCase
 {
-    private const /*string*/ TEST_FILES_FOLDER = 'tests/testFiles/';
-
-    private const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
-
-    /** @var Encryption $encryption */
     private Encryption $encryption;
 
     public function setUp(): void
     {
-        /** @property Encryption $encryption */
-
         $this->encryption = new Encryption();
     }
 
     public function testEncryptionWithImage()
     {
-        $decryptedString = $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
-            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+        $decryptedString = $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
+            MediaTypeEnum::IMAGE,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'imageEnc.jpeg', $decryptedString);
@@ -38,9 +32,10 @@ class EncryptionTest extends TestCase
 
     public function testEncryptionWithAudio()
     {
-        $decryptedString = $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'AUDIO.mp3',
-            self::SAMPLES_FILES_FOLDER.'AUDIO.key'
+        $decryptedString = $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'AUDIO.mp3'),
+            MediaTypeEnum::AUDIO,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'AUDIO.key')
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'audioEnc.mp3', $decryptedString);
@@ -51,11 +46,12 @@ class EncryptionTest extends TestCase
         $this->assertEquals($originalHash, $encryptedHash);
     }
 
-    public function testEncryptionWithVideo()
+    public function testEncryptionWithVideo(): void
     {
-        $decryptedString = $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
-            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+        $decryptedString = $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),
+            MediaTypeEnum::VIDEO,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
 
         file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $decryptedString);
@@ -70,14 +66,15 @@ class EncryptionTest extends TestCase
     {
         $this->markTestSkipped('anyway not working');
         //act
-        $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'VIDEO.mp4',
-            self::SAMPLES_FILES_FOLDER.'VIDEO.key'
+        $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4'),
+            MediaTypeEnum::VIDEO,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
         );
 
         $sideCar = $this->encryption->getSideCar();
 
-//        dd($sideCar, file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.sidecar'));
+        //        dd($sideCar, file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.sidecar'));
         file_put_contents(self::TEST_FILES_FOLDER.'video.sidecar', $sideCar);
 
         //assert
@@ -90,9 +87,10 @@ class EncryptionTest extends TestCase
     public function testSideCarWithDocument()
     {
         //act
-        $this->encryption->encryptFile(
-            self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg',
-            self::SAMPLES_FILES_FOLDER.'IMAGE.key'
+        $this->encryption->encryptStream(
+            $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
+            MediaTypeEnum::IMAGE,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.key')
         );
 
         $sideCar = $this->encryption->getSideCar();

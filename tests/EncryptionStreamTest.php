@@ -5,16 +5,16 @@ namespace Mikhail\Tests\Encryptor;
 use GuzzleHttp\Psr7\Utils;
 use Mikhail\Encryptor\DecryptingStream;
 use Mikhail\Encryptor\EncryptingStream;
-use PHPUnit\Framework\TestCase;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 
-class EncryptionStreamTest extends TestCase
+class EncryptionStreamTest extends BaseTestCase
 {
     public function testEncryptionCorrectness()
     {
         // Arrange
-        $plaintext = 'Hello, world!';
+        $plaintext = 'Hello, world!gllkjklnk;njknk;nk;nk;nk;jknknkjnjnkjn';
         $stream = Utils::streamFor($plaintext);
-        $encryptingStream = new EncryptingStream($stream);
+        $encryptingStream = new EncryptingStream($stream, MediaTypeEnum::DOCUMENT);
 
         // Act
         $encryptedData = $encryptingStream->read(strlen($plaintext));
@@ -23,41 +23,48 @@ class EncryptionStreamTest extends TestCase
         $this->assertNotEquals($plaintext, $encryptedData);
 
         $stream = Utils::streamFor($encryptedData);
-        $decryptingStream = new DecryptingStream($stream);
+        $decryptingStream = new DecryptingStream(
+            $stream,
+            MediaTypeEnum::DOCUMENT,
+            file_get_contents('mediaKey.txt')
+        );
+
         $decryptedData = $decryptingStream->read(strlen($encryptedData));
 
         $this->assertEquals($plaintext, $decryptedData);
-
     }
 
-    public function testStreamReadingBehavior()
+    public function testEncryptForImage()
     {
-//        $this->markTestIncomplete();
-        // Arrange
-        $plaintext = 'Hello, world!';
-        $stream = Utils::streamFor($plaintext);
-        $encryptingStream = new EncryptingStream($stream);
+        $stream =  $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4');
+        $encryptingStream = new EncryptingStream(
+            $stream,
+            MediaTypeEnum::VIDEO,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
+        );
 
-        // Act
-        $encryptedData = $encryptingStream->read(10); // Read 10 bytes
+        file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $encryptingStream->read($encryptingStream->getSize()));
 
-        // Assert
-        $this->assertNotEmpty($encryptedData);
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'videoEnc.mp4');
+        $encryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'videoEnc.mp4');
+
+        $this->assertEquals($originalHash, $encryptedHash);
     }
 
-    public function testErrorHandling()
+    public function testDecryptForImage()
     {
-        $this->markTestIncomplete();
+        $stream =  $this->getStreamFromFile(self::SAMPLES_FILES_FOLDER.'VIDEO.mp4');
+        $decryptingStream = new DecryptingStream(
+            $stream,
+            MediaTypeEnum::VIDEO,
+            file_get_contents(self::SAMPLES_FILES_FOLDER.'VIDEO.key')
+        );
 
-        // Arrange
-        $invalidData = '';
-        $stream = Utils::streamFor($invalidData);
-        $encryptingStream = new EncryptingStream($stream);
+        file_put_contents(self::TEST_FILES_FOLDER.'videoEnc.mp4', $decryptingStream->read($decryptingStream->getSize()));
 
-        // Act
-        $encryptedData = $encryptingStream->read(10);
-//        dd($encryptedData);
-        //& Assert
-        $this->assertEmpty($encryptedData);
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'videoEnc.mp4');
+        $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'videoEnc.mp4');
+
+        $this->assertEquals($originalHash, $decryptedHash);
     }
 }

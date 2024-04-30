@@ -2,14 +2,16 @@
 
 namespace Mikhail\Encryptor;
 
-use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\Psr7\Utils;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Psr\Http\Message\StreamInterface;
 use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
 use Mikhail\Encryptor\Exceptions\CryptException;
-use Mikhail\Encryptor\Exceptions\FileNotFoundException;
 
 class Decryption extends Crypt
 {
+    protected string $mediaKey;
+
     protected function unpad($data): string
     {
         $padding = ord($data[strlen($data) - 1]);
@@ -19,39 +21,44 @@ class Decryption extends Crypt
 
     /**
      * @throws CorruptedMediaKeyException
-     * @throws CryptException
-     * @throws FileNotFoundException
      */
-    protected function decryptStreamData(string $keyFileName): string
+    protected function checkMediaKey(): void
     {
+        if (strlen($this->mediaKey) !== self::MEDIA_KEY_LENGTH) {
+            throw new CorruptedMediaKeyException('mediaKey is not '.self::MEDIA_KEY_LENGTH.' bytes');
+        }
+    }
+
+    /**
+     * @throws CorruptedMediaKeyException
+     * @throws CryptException
+     */
+    public function decryptStream(
+        StreamInterface $stream,
+        string $mediaKey,
+        MediaTypeEnum $mediaType,
+    ): string {
+        $this->stream = $stream;
+        $this->mediaType = $mediaType;
+        $this->mediaKey = $mediaKey;
+
         //1. Obtain `mediaKey`.
-        $mediaKey = $this->getMediaKeyFromFile($keyFileName);
+        $this->checkMediaKey();
 
         //2. Expand it
-        $mediaKeyExpanded = $this->getExpandedMediaKey($mediaKey);
-
         //3. Split `mediaKeyExpanded`
-        [$iv, $cipherKey, $macKey] = $this->splitExpandedKey($mediaKeyExpanded);
+        [$iv, $cipherKey, $this->macKey] = $this->splitExpandedKey($this->getExpandedMediaKey());
         $this->iv = $iv;
 
         //4. Obtain file and mac
         [$file, $mac] = $this->getFileAndMacFromEncryptedMedia();
-        $this->stream = $this->stringToStream($file);
+        $this->stream = Utils::streamFor($file);
 
         //5. Validate media data
-        $this->validateMediaData($file, $mac, $iv, $macKey);
+        $this->validateMediaData($file, $mac);
 
         //6. Decrypt `file`
         return $this->decrypt($cipherKey);
-    }
-
-    protected function stringToStream(string $data): StreamInterface
-    {
-        $stream = fopen('php://temp', 'r+');
-        fwrite($stream, $data);
-        rewind($stream);
-
-        return new Stream($stream);
     }
 
     protected function getFileAndMacFromEncryptedMedia(): array
@@ -62,26 +69,33 @@ class Decryption extends Crypt
         // Extract the encrypted file data
         $encryptedFile = substr($mediaData, 0, -self::MAC_LENGTH);
 
-        // Extract the MAC from the end of the encrypted data
-        $mac = substr($mediaData, -self::MAC_LENGTH);
-
         // Rewind the stream to its original position
         $this->stream->rewind();
 
-        return [$encryptedFile, $mac];
+        return [$encryptedFile, $this->getMacFromEncryptedMedia()];
+    }
+
+    protected function getMacFromEncryptedMedia(): string
+    {
+        $mediaLength = $this->stream->getSize(); // Assuming the stream supports size
+
+        // Seek to the beginning of the MAC (excluding data)
+        $this->stream->seek($mediaLength - self::MAC_LENGTH);
+
+        // Read the MAC
+        $mac = $this->stream->read(self::MAC_LENGTH);
+        $this->stream->rewind();
+
+        return $mac;
     }
 
     /**
      * @throws CryptException
      */
-    protected function validateMediaData(
-        string $encryptedFile,
-        string $mac,
-        string $iv,
-        string $macKey,
-    ): void {
+    protected function validateMediaData(string $encryptedFile,string $mac): void
+    {
         // Validate media data with HMAC by signing iv + encryptedFile with macKey using SHA-256
-        $computedMac = $this->getMac($iv, $encryptedFile, $macKey);
+        $computedMac = $this->getMac($this->iv, $encryptedFile, $this->macKey);
 
         // Compare the computed MAC with the received MAC
         if (! hash_equals($mac, $computedMac)) {
@@ -97,25 +111,10 @@ class Decryption extends Crypt
         $decryptedData = '';
 
         while (! $this->stream->eof()) {
-
             // Read a chunk of data from the stream
             $encryptedChunk = $this->stream->read(self::BLOCK_SIZE);
-            $isLastChunk = $this->stream->eof();
 
-            if ($isLastChunk) {
-                break;
-            }
-            $decryptedChunk = openssl_decrypt(
-                data: $encryptedChunk,
-                cipher_algo: self::CIPHER_ALGORITHM,
-                passphrase: $cipherKey,
-                options: OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
-                iv: $this->getCurrentIv(),
-            );
-
-            if ($decryptedChunk === false) {
-                throw new CryptException('Decrypted data failed: '.openssl_error_string());
-            }
+            $decryptedChunk = $this->decryptChunk($cipherKey, $encryptedChunk);
 
             $decryptedData .= $decryptedChunk;
             $this->updateIv($encryptedChunk);
@@ -125,20 +124,25 @@ class Decryption extends Crypt
     }
 
     /**
-     * принимает зашифрованный методом encryptFile файл, возвращает дешифрованную последоватлеьность байтов
+     * @throws CryptException
      */
-    public function decryptFile(
-        string $filePath,
-        /** здесь либо пользователь предоставляет нужный ключ, либо берем потенциально последний сгенеренный */
-        string $keyFileName = self::DEFAULT_MEDIA_KEY_FILE_NAME,
-    ): string {
-        $stream = $this->getStreamFromFile($filePath);
-        $this->stream = $stream;
+    protected function decryptChunk(string $cipherKey, string $encryptedChunk): string
+    {
+        //the last chunk is always empty string, so it is impossible to decrypt
+        if ($this->stream->eof()) {
+            return '';
+        }
+        $decryptedChunk = openssl_decrypt(
+            data: $encryptedChunk,
+            cipher_algo: self::CIPHER_ALGORITHM,
+            passphrase: $cipherKey,
+            options: OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
+            iv: $this->getCurrentIv(),
+        );
 
-        $mediaType = $this->getMediaType($filePath);
-        $this->mediaType = $mediaType;
-
-        return $this->decryptStreamData($keyFileName);
+        if ($decryptedChunk === false) {
+            throw new CryptException('Decrypted data failed: '.openssl_error_string());
+        }
+        return $decryptedChunk;
     }
-
 }
