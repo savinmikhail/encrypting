@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace src;
+namespace Mikhail\Encryptor;
 
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
+use Mikhail\Encryptor\Exceptions\CryptException;
+use Mikhail\Encryptor\Exceptions\FileNotFoundException;
 use Psr\Http\Message\StreamInterface;
 use Random\RandomException;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
 
 class Encryption extends Crypt
 {

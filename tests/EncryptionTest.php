@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryptor;
 
-use src\Encryption;
-use src\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Encryption;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 
 class EncryptionTest extends BaseTestCase
 {

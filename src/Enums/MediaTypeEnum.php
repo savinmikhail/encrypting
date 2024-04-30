@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Enums;
+namespace Mikhail\Encryptor\Enums;
 
 enum MediaTypeEnum: string
 {

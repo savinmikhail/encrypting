@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryptor;
 
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class BaseTestCase extends TestCase
 {
-    protected const /*string*/ TEST_FILES_FOLDER = 'tests/Unit/testFiles/';
+    protected const /*string*/ TEST_FILES_FOLDER = 'tests/testFiles/';
 
     protected const /*string*/ SAMPLES_FILES_FOLDER = 'samples/';
 

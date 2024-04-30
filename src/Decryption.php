@@ -1,12 +1,12 @@
 <?php
 
-namespace src;
+namespace Mikhail\Encryptor;
 
 use GuzzleHttp\Psr7\Utils;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 use Psr\Http\Message\StreamInterface;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
+use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
+use Mikhail\Encryptor\Exceptions\CryptException;
 
 class Decryption extends Crypt
 {

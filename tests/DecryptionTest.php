@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryptor;
 
-use src\Decryption;
-use src\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Decryption;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 
 class DecryptionTest extends BaseTestCase
 {
@@ -56,9 +56,9 @@ class DecryptionTest extends BaseTestCase
 
         file_put_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg', $decryptedString);
 
-        $this->assertEquals(
-            file_get_contents(self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg'),
-            file_get_contents(self::TEST_FILES_FOLDER.'IMAGE.jpeg')
-        );
+        $originalHash = hash_file('sha256', self::SAMPLES_FILES_FOLDER.'IMAGE.jpeg');
+        $decryptedHash = hash_file('sha256', self::TEST_FILES_FOLDER.'IMAGE.jpeg');
+
+        $this->assertEquals($originalHash, $decryptedHash);
     }
 }

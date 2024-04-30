@@ -1,13 +1,11 @@
 <?php
 
-namespace src;
+namespace Mikhail\Encryptor;
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CryptException;
 use Psr\Http\Message\StreamInterface;
-use Random\RandomException;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
 
 class EncryptingStream extends Encryption implements StreamInterface
 {

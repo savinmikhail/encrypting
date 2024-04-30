@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryptor;
 
 use GuzzleHttp\Psr7\Utils;
-use src\DecryptingStream;
-use src\EncryptingStream;
-use src\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\DecryptingStream;
+use Mikhail\Encryptor\EncryptingStream;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
 
 class EncryptionStreamTest extends BaseTestCase
 {

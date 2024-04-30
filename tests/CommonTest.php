@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Unit;
+namespace Mikhail\Tests\Encryptor;
 
-use src\Decryption;
-use src\Encryption;
-use src\Enums\MediaTypeEnum;
-use src\Exceptions\CorruptedMediaKeyException;
-use src\Exceptions\CryptException;
+use Mikhail\Encryptor\Decryption;
+use Mikhail\Encryptor\Encryption;
+use Mikhail\Encryptor\Enums\MediaTypeEnum;
+use Mikhail\Encryptor\Exceptions\CorruptedMediaKeyException;
+use Mikhail\Encryptor\Exceptions\CryptException;
 
 class CommonTest extends BaseTestCase
 {

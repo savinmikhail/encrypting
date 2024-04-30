@@ -6,12 +6,12 @@
 >
     <testsuites>
         <testsuite name="Unit">
-            <directory>tests/Unit</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
-            <directory>app</directory>
+            <directory>src</directory>
         </include>
     </source>
 </phpunit>
